@@ -6,7 +6,7 @@ Ma'noni tushunishga urinma. Jadval bo'yicha bajar, ortiqcha o'ylama.
 
 qonMunosabat: qulf | ochiq | ochiq_emas        (standart: qulf)
 yoshChegara: 6 | 8 | 10                        (standart: 8)
-majburiyUsul: true | false                     (standart: true)
+majburUsul: true | false                     (standart: true)
 nikoh: mono | kop | cheksiz                    (standart: kop)
 lesbian: true | false                          (standart: false)
 xxx: true | false                              (standart: false)
@@ -15,7 +15,7 @@ olim: true | false                             (standart: false)
 tasodif: past | orta | yuqori                  (standart: orta)
 qiyinlik: yumshoq | normal | qattiq            (standart: yumshoq)
 
-methods: suhbat, sovga, alkogol, afrodizyak, massaj, ofuro, tungi, majburiy
+methods: suhbat, sovga, alkogol, afrodizyak, massaj, ofuro, tungi, majbur
 
 ## Fayllar
 
@@ -34,8 +34,8 @@ aloqa.js, settings_extra.js, ui_intimacy.js, names.json, voqealar matni.
 
 ## Shaxs maydonlari
 
-id, name, age, jins ('f'|'m'), alive, relation, consanguinity, holat, yaqinlik,
-affection, trust, suspicion, pregnant, history
+id, name, age, jins ('f'|'m'), alive, relation, consanguinity, holat, aloqa,
+mehr, ishonch, shubha, pregnant, history
 
 ## Holat maydonlari
 
@@ -43,11 +43,11 @@ year, age, money, debt, night, balance, settings, player, people, children, xoti
 
 ## applyEffect op'lari
 
-affection, suspicion, trust, money, honor, stat, intimacy, pregnancy,
+mehr, shubha, ishonch, money, honor, stat, aloqa, pregnancy,
 concealPaternity, abort, discovery, retry
 
 ## Voqea formati
 
 { id, title, weight, cond, text, choices[{ label, effects[{op, v}] }] }
 
-cond: relation, yaqinlik, pregnant, affectionMin, minAge, night, wifeAway
+cond: relation, aloqa, pregnant, aloqaMin, minAge, night, wifeAway

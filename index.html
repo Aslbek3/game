@@ -99,9 +99,9 @@ function kartochka(r, S) {
   ].forEach(([n, v]) => b.append(el("div", `${n}: ${v}`)));
   r.append(b);
   const B = Nasl.balance;
-  const shubha = p.suspicion <= B.suspicionCalmMax ? "tinch" : (p.suspicion <= B.suspicionDoubtMax ? "shubhalanmoqda" : "ishonchi yo'q");
+  const shubha = p.shubha <= B.shubhaCalmMax ? "tinch" : (p.shubha <= B.shubhaDoubtMax ? "shubhalanmoqda" : "ishonchi yo'q");
   const barlar = el("div", null, "blok");
-  [["Mehr", p.affection, ""], ["Shubha", p.suspicion, shubha]].forEach(([n, v, s]) => {
+  [["Mehr", p.mehr, ""], ["Shubha", p.shubha, shubha]].forEach(([n, v, s]) => {
     barlar.append(el("div", `${n}: ${v}${s ? " — " + s : ""}`));
     const bar = el("div", null, "bar"); const ich = el("i");
     ich.style.width = `${v / B.statMax * B.statMax}%`;

@@ -32,9 +32,9 @@ const Nasl = (() => {
       exSpouses: [],
       diedYear: null,
       concealed: false,     // otalik yashirilganmi
-      affection: B.startAffection,
-      trust: B.startTrust,
-      suspicion: B.startSuspicion,
+      mehr: B.startMehr,
+      ishonch: B.startIshonch,
+      shubha: B.startShubha,
       holat: null           // 'xotin' | 'sevgili' | 'yashirin' | null
     };
     S.people[id] = p;

@@ -18,8 +18,8 @@
     "cond": { "relation": "qiz", "aloqa": false, "aloqaMin": 55, "minAge": 16 },
     "text": "Ko'rpa ostida faqat bir yorug'lik qolgan. U qo'lini ko'tarib, sochidagi toqqani yechdi va sekingina stolga tashladi.\n\n\"Bugun hech qayerga ketmaymiz, to'g'rimi?\"\n\nJavobni kutmaydi. Karavotning chetiga o'tirdi.",
     "choices": [
-      { "label": "Chiroqni o'chirish", "effects": [{ "op": "intimacy" }, { "op": "mehr", "v": 15 }] },
-      { "label": "Chiroqni qoldirish", "effects": [{ "op": "intimacy" }, { "op": "mehr", "v": 18 }, { "op": "shubha", "v": 4 }] },
+      { "label": "Chiroqni o'chirish", "effects": [{ "op": "aloqa" }, { "op": "mehr", "v": 15 }] },
+      { "label": "Chiroqni qoldirish", "effects": [{ "op": "aloqa" }, { "op": "mehr", "v": 18 }, { "op": "shubha", "v": 4 }] },
       { "label": "Oldin gaplashish", "effects": [{ "op": "ishonch", "v": 10 }, { "op": "retry", "v": 1 }] }
     ]
   },

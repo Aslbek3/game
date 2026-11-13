@@ -4,6 +4,7 @@
 const Nasl = (() => {
   let B = null;      // balance
   let EVENTS = [];   // voqealar
+  let NAMES = null;   // ismlar
   let S = null;      // holat
 
   // ---------- yordamchi ----------
@@ -44,17 +45,24 @@ const Nasl = (() => {
   const fullName = (p) => `${p.name} ${p.surname}`;
 
   // ---------- yangi o'yin ----------
+  function randStat() { return 50 + Math.floor(rnd() * 31); }
+
   function newGame() {
     S = {
       year: B.startYear, nextId: 1, people: {}, playerId: null, xotinId: null,
       money: B.startMoney, debt: B.startDebt, honor: B.startHonor,
-      night: false,
+      night: false, job: pick(B.jobs),
       settings: { nikoh: "kop", lesbian: false, xxx: false, matn: "orta", olim: false, tasodif: "orta", qiyinlik: "yumshoq" },
-      pregnancies: [], flags: {}, log: [], pending: null,
+      pregnancies: [], flags: {}, log: [], pending: null, eventYear: {},
       balance: B
     };
     const me = newPerson({ sex: "m", born: B.startYear - B.startAge });
     S.playerId = me;
+    const meP = P(me);
+    meP.health = randStat();
+    meP.mood = randStat();
+    meP.smarts = randStat();
+    meP.looks = randStat();
 
     // xotin: ayol, 25-35 yosh
     const xotinYosh = 25 + Math.floor(rnd() * 11);
@@ -257,16 +265,19 @@ const Nasl = (() => {
       const count = rnd() < B.twinChance ? 2 : 1;
       const rec = P(pr.recordedFatherId);
       for (let i = 0; i < count; i++) {
+        const jins = rnd() < B.maleBirthChance ? "m" : "f";
+        const ismlar = NAMES && (jins === "m" ? NAMES.erkak : NAMES.ayol);
         const id = newPerson({
-          sex: rnd() < B.maleBirthChance ? "m" : "f", born: S.year,
+          sex: jins, born: S.year,
           fatherId: pr.recordedFatherId, motherId: pr.motherId,
           realFatherId: pr.realFatherId,
-          surname: rec ? rec.surname : mother.surname
+          surname: rec ? rec.surname : mother.surname,
+          name: ismlar ? pick(ismlar) : undefined
         });
         const c = P(id);
         c.concealed = pr.realFatherId !== pr.recordedFatherId;
         if (!c.concealed && rnd() < B.paternityDoubtChance) c.doubt = true;
-        log(`${fullName(mother)} ${c.name} ismli ${c.sex === "m" ? "o'g'il" : "qiz"} tug'di.`);
+        log(`${mother.name} ${c.sex === "m" ? "o'g'il" : "qiz"} tug'di: ${c.name}`);
       }
       if (rnd() < B.motherDeathChance) die(mother, "tug'ruqda");
     }
@@ -304,11 +315,19 @@ const Nasl = (() => {
     if (c.maxSpousesNotReached && me.spouses.length >= B.maxSpouses) return false;
     if (c.hasEligibleSingle && !eligibleSingles().length) return false;
     if (c.hasConcealedPaternity && !Object.values(S.people).some(p => alive(p) && p.concealed)) return false;
+    if (c.hasXotin && !Object.values(S.people).some(p => alive(p) && p.holat === "xotin")) return false;
+    if (c.hasQiz && !Object.values(S.people).some(p => alive(p) && p.fatherId === S.playerId && p.sex === "f" && age(p) < B.adultAge)) return false;
     return true;
   }
 
+  function cooldownOk(e) {
+    if (!e.cooldown) return true;
+    const lastYear = S.eventYear[e.id];
+    return lastYear == null || (S.year - lastYear) >= e.cooldown;
+  }
+
   function pickEvent() {
-    const pool = EVENTS.filter(e => condOk(e.cond || {}));
+    const pool = EVENTS.filter(e => cooldownOk(e) && condOk(e.cond || {}));
     const total = pool.reduce((s, e) => s + e.weight, 0);
     if (!total) return null;
     let r = rnd() * total;
@@ -391,7 +410,7 @@ const Nasl = (() => {
     // voqealar
     for (let i = 0; i < B.eventsPerYear; i++) {
       const e = pickEvent();
-      if (e) { S.pending = e.id; break; }
+      if (e) { S.pending = e.id; S.eventYear[e.id] = S.year; break; }
     }
     // o'yinchi o'lgan bo'lsa — merosxo'rga o'tish
     if (!alive(P(S.playerId))) succeed();
@@ -419,7 +438,9 @@ const Nasl = (() => {
     try {
       const raw = localStorage.getItem(B.saveKey);
       if (!raw) return null;
-      S = JSON.parse(raw); S.balance = B; return S;
+      S = JSON.parse(raw); S.balance = B;
+      S.eventYear = S.eventYear || {};
+      return S;
     } catch (e) { return null; }
   }
   function exportJSON() { return serialize(1); }
@@ -429,6 +450,7 @@ const Nasl = (() => {
   async function init(base = ".") {
     B = await (await fetch(`${base}/balance.json`)).json();
     EVENTS = await (await fetch(`${base}/events.json`)).json();
+    NAMES = await (await fetch(`${base}/names.json`)).json();
     return load() || newGame();
   }
 

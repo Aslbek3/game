@@ -1,29 +1,57 @@
 [
   {
-    "id": "mol_hosil",
-    "title": "Hosil yili",
+    "id": "xotin_suhbati",
+    "title": "Xotin bilan suhbat",
     "weight": 3,
-    "cond": { "minAge": 18 },
-    "text": "Bu yil hosil yaxshi bo'ldi.",
+    "cooldown": 2,
+    "cond": { "minAge": 18, "hasXotin": true },
+    "text": "Kechqurun xotiningiz oldingizga keldi. U bugungi kun haqida gaplashmoqchi, lekin siz charchagansiz.",
     "choices": [
-      { "label": "Sotish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallGain" }] },
-      { "label": "Qo'shnilarga ulashish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] }
+      { "label": "Quloq solish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] },
+      { "label": "E'tiborsiz qoldirish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorLoss" }] }
     ]
   },
   {
-    "id": "qurgoqchilik",
-    "title": "Qurg'oqchilik",
-    "weight": 2,
-    "cond": { "minAge": 18 },
-    "text": "Qurg'oqchilik yilni og'irlashtirdi.",
+    "id": "qiz_osishi",
+    "title": "Qizingiz o'sib qoldi",
+    "weight": 3,
+    "cooldown": 3,
+    "cond": { "hasQiz": true },
+    "text": "Qizingiz maktabdan kiyim-kechak va kitoblar uchun pul so'radi.",
     "choices": [
-      { "label": "Zaxiradan sarflash", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallLoss" }] }
+      { "label": "Pul berish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallLoss" }] },
+      { "label": "Maslahat berish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] }
+    ]
+  },
+  {
+    "id": "ish_taklifi",
+    "title": "Ish taklifi",
+    "weight": 2,
+    "cooldown": 5,
+    "cond": { "minAge": 18 },
+    "text": "Tanishlaringizdan biri sizga qo'shimcha ish taklif qildi.",
+    "choices": [
+      { "label": "Qabul qilish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallGain" }] },
+      { "label": "Rad etish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] }
+    ]
+  },
+  {
+    "id": "qarindosh_tashrifi",
+    "title": "Qarindosh tashrifi",
+    "weight": 2,
+    "cooldown": 2,
+    "cond": { "minAge": 18 },
+    "text": "Uzoq qarindoshlaringiz mehmonga keldi va yordam so'rashdi.",
+    "choices": [
+      { "label": "Yordam berish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallLoss" }, { "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] },
+      { "label": "Rad etish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorLoss" }] }
     ]
   },
   {
     "id": "yangi_xotin",
     "title": "Nikoh taklifi",
     "weight": 2,
+    "cooldown": 5,
     "cond": { "minAge": 18, "maxSpousesNotReached": true, "hasEligibleSingle": true },
     "text": "Kelishuv bo'yicha yangi nikoh taklif qilindi.",
     "choices": [
@@ -35,6 +63,7 @@
     "id": "sir_ochildi",
     "title": "Oshkor bo'lgan sir",
     "weight": 2,
+    "cooldown": 10,
     "cond": { "hasConcealedPaternity": true },
     "text": "Bir bolaning otaligi haqida gap tarqaldi.",
     "choices": [

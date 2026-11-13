@@ -54,6 +54,12 @@
   "maxSpouses": 4,
   "saveKey": "nasl_save_v2",
   "logLimit": 200,
+  "jobs": [
+    { "title": "Konsultant", "salary": 2200 },
+    { "title": "Ofis xodimi", "salary": 1800 },
+    { "title": "O'qituvchi", "salary": 1600 },
+    { "title": "Sotuvchi", "salary": 1500 }
+  ],
   "methods": {
     "suhbat":     { "narx": 0,   "aloqaMin": 20, "ehtimol": 0.5,  "shubha": 2 },
     "sovga":      { "narx": 120, "aloqaMin": 0,  "ehtimol": 0.7,  "shubha": -15 },

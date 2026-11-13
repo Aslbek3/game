@@ -1,8 +1,10 @@
 :root {
   --fon: #101318;
-  --matn: #d5d8dc;
+  --panel: #0b2233;
   --aksent: #35c6da;
-  --tugma: #1c2027;
+  --yashil: #22b43a;
+  --matn: #d5d8dc;
+  --kulrang: #8b939c;
   --chegara: #2a303a;
 }
 * { box-sizing: border-box; }
@@ -10,39 +12,170 @@ body {
   margin: 0; background: var(--fon); color: var(--matn);
   font-family: system-ui, sans-serif; line-height: 1.5;
 }
-#ilova { max-width: 760px; margin: 0 auto; padding: 16px; }
-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+button { font: inherit; }
+#ilova { max-width: 480px; margin: 0 auto; padding-bottom: 96px; min-height: 100vh; }
+
+/* a) sarlavha */
+#sarlavha {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px;
+}
+.doira-tugma {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: transparent; border: 1px solid #fff; color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; padding: 0;
+}
+.nasl-nom { color: #e8c94a; font-weight: 800; font-size: 22px; letter-spacing: .5px; }
+.muhr {
+  border: 2px solid var(--aksent); color: var(--aksent); font-weight: 800;
+  font-size: 11px; letter-spacing: 1px; padding: 4px 8px; border-radius: 6px;
+  transform: rotate(-4deg);
+}
+
+/* dropdown menyu */
+#menyuRoyxat {
+  position: absolute; top: 56px; left: 14px; z-index: 20;
+  background: var(--panel); border: 1px solid var(--chegara); border-radius: 10px;
+  overflow: hidden; min-width: 160px; box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+#menyuRoyxat button {
+  display: block; width: 100%; text-align: left; background: none; border: none;
+  color: var(--matn); padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--chegara);
+}
+#menyuRoyxat button:last-child { border-bottom: none; }
+#menyuRoyxat button:hover { background: var(--tugma, #1c2027); color: var(--aksent); }
+
+/* b) ma'lumot qatori */
+#malumot {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px 14px;
+}
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--aksent);
+  color: #06161a; font-weight: 800; font-size: 20px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.bayroq {
+  width: 22px; height: 15px; flex-shrink: 0; border-radius: 2px; overflow: hidden;
+  background: linear-gradient(#1eb53a 0 33%, #fff 33% 38%, #0099b5 38% 71%, #fff 71% 76%, #ce1126 76% 100%);
+}
+.shaxs-info { flex: 1; min-width: 0; }
+.ism { color: var(--aksent); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.kasb { color: var(--kulrang); font-size: 13px; }
+.moliya { text-align: right; flex-shrink: 0; }
+.pul-son { color: var(--yashil); font-weight: 800; font-size: 16px; }
+.bank-tugma {
+  display: block; background: none; border: none; color: var(--kulrang);
+  font-size: 12px; cursor: pointer; padding: 0; text-decoration: underline;
+}
+.qarz-qatori { color: var(--kulrang); font-size: 12px; margin-top: 2px; }
+
+/* c) voqealar lentasi */
+#lenta {
+  height: 270px; overflow-y: auto; margin: 0 14px 14px;
+  border: 1px solid var(--chegara); border-radius: 10px; padding: 10px 12px;
+  background: rgba(255,255,255,.015);
+}
+.lenta-sarlavha { color: var(--aksent); font-weight: 700; margin: 10px 0 4px; }
+.lenta-sarlavha:first-child { margin-top: 0; }
+.lenta-matn { color: var(--kulrang); font-size: 14px; padding: 2px 0; }
+
+/* e) statlar */
+#statlar { padding: 0 14px 14px; }
+.stat-qator { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.stat-yorliq {
+  color: var(--aksent); font-weight: 700; width: 92px; text-align: right;
+  font-size: 13px; flex-shrink: 0;
+}
+.stat-bar {
+  flex: 1; height: 18px; background: var(--chegara); border-radius: 4px;
+  position: relative; overflow: hidden;
+}
+.stat-bar i {
+  display: block; height: 100%; background: var(--yashil);
+}
+.stat-foiz {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+}
+
+/* d) harakat paneli */
+#harakatPanel {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+  background: var(--panel); border-top: 1px solid var(--chegara);
+  display: grid; grid-template-columns: 1fr 1fr auto 1fr 1fr;
+  align-items: center; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.harakat-ustun {
+  background: none; border: none; color: var(--kulrang);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 2px; cursor: pointer; font-size: 12px;
+}
+.harakat-ustun:disabled { opacity: .4; cursor: not-allowed; }
+.harakat-ustun .ikon { font-size: 18px; }
+.yosh-doira {
+  width: 74px; height: 74px; border-radius: 50%;
+  background: var(--yashil); border: 3px solid #fff; color: #fff;
+  font-weight: 800; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin: -26px 6px 0; box-shadow: 0 4px 14px rgba(0,0,0,.4);
+}
+.yosh-doira:disabled { opacity: .5; cursor: not-allowed; }
+
+/* f) pastdan chiqadigan sheet */
+#sheet {
+  position: fixed; inset: 0; background: rgba(16,19,24,.7); z-index: 30;
+  align-items: flex-end; justify-content: center;
+}
+#sheet:not(.yashirin) { display: flex; }
+.sheet-ichki {
+  background: var(--fon); width: 100%; max-width: 480px; max-height: 85vh;
+  border-radius: 16px 16px 0 0; border: 1px solid var(--chegara); border-bottom: none;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sheet-bosh {
+  display: flex; justify-content: flex-end; padding: 8px 10px;
+  border-bottom: 1px solid var(--chegara);
+}
+.sheet-bosh button {
+  background: none; border: none; color: var(--matn); font-size: 22px;
+  cursor: pointer; line-height: 1; padding: 4px 8px;
+}
+#sheetTana { overflow-y: auto; padding: 14px; }
+
+/* eski umumiy uslublar */
+.blok { border: 1px solid var(--chegara); padding: 12px; margin-bottom: 12px; }
+h2, h3 { color: var(--aksent); margin: 0 0 8px; }
 button {
-  background: var(--tugma); color: var(--matn);
-  border: 1px solid var(--chegara); padding: 8px 14px; cursor: pointer; font: inherit;
+  background: #1c2027; color: var(--matn);
+  border: 1px solid var(--chegara); padding: 8px 14px; cursor: pointer;
 }
 button:hover:not(:disabled) { border-color: var(--aksent); }
 button.faol { border-color: var(--aksent); color: var(--aksent); }
 button:disabled { opacity: .45; cursor: not-allowed; }
-h2, h3 { color: var(--aksent); margin: 0 0 8px; }
-.blok { border: 1px solid var(--chegara); padding: 12px; margin-bottom: 12px; }
-.korsatkich { display: flex; flex-wrap: wrap; gap: 16px; }
-.korsatkich span b { color: var(--aksent); }
 #log { max-height: 260px; overflow: auto; font-size: 14px; }
 #log div { padding: 2px 0; border-bottom: 1px solid var(--chegara); }
 .qator {
   display: flex; justify-content: space-between; gap: 8px;
   padding: 8px; border-bottom: 1px solid var(--chegara); cursor: pointer;
 }
-.qator:hover { background: var(--tugma); }
+.qator:hover { background: #1c2027; }
 .vafot { opacity: .5; }
-.bar { height: 8px; background: var(--tugma); border: 1px solid var(--chegara); margin: 4px 0 10px; }
+.bar { height: 8px; background: #1c2027; border: 1px solid var(--chegara); margin: 4px 0 10px; }
 .bar i { display: block; height: 100%; background: var(--aksent); }
 .yashirin { display: none; }
 .sozlama { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; gap: 8px; }
 select, textarea {
-  background: var(--tugma); color: var(--matn); border: 1px solid var(--chegara);
+  background: #1c2027; color: var(--matn); border: 1px solid var(--chegara);
   padding: 6px; font: inherit;
 }
 textarea { width: 100%; height: 90px; }
+.usul {
+  display: block; width: 100%; text-align: left; margin-bottom: 6px;
+}
 #voqea {
   position: fixed; inset: 0; background: rgba(16, 19, 24, .92);
-  align-items: center; justify-content: center; padding: 16px;
+  align-items: center; justify-content: center; padding: 16px; z-index: 40;
 }
 #voqea:not(.yashirin) { display: flex; }
 #voqea .oyna {
@@ -50,4 +183,4 @@ textarea { width: 100%; height: 90px; }
   max-width: 480px; width: 100%; padding: 16px;
 }
 #voqea button { display: block; width: 100%; margin-top: 8px; text-align: left; }
-@media (max-width: 480px) { #ilova { padding: 10px; } }
+@media (max-width: 480px) { #ilova { padding-bottom: 92px; } }

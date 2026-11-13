@@ -46,7 +46,7 @@ const Nasl = (() => {
   // ---------- yangi o'yin ----------
   function newGame() {
     S = {
-      year: B.startYear, nextId: 1, people: {}, playerId: null,
+      year: B.startYear, nextId: 1, people: {}, playerId: null, xotinId: null,
       money: B.startMoney, debt: B.startDebt, honor: B.startHonor,
       night: false,
       settings: { nikoh: "kop", lesbian: false, xxx: false, matn: "orta", olim: false, tasodif: "orta", qiyinlik: "yumshoq" },
@@ -55,17 +55,22 @@ const Nasl = (() => {
     };
     const me = newPerson({ sex: "m", born: B.startYear - B.startAge });
     S.playerId = me;
-    for (let i = 0; i < B.startSpouses; i++) marry(me, newPerson({ sex: "f", born: B.startYear - B.startAge }), true);
-    // boshlang'ich bolalar
-    const wives = P(me).spouses;
-    for (let i = 0; i < B.startChildren && wives.length; i++) {
-      const w = P(wives[i % wives.length]);
-      newPerson({
-        sex: rnd() < B.maleBirthChance ? "m" : "f",
-        born: B.startYear - B.adultAge - i,
-        fatherId: me, motherId: w.id, surname: P(me).surname
-      });
-    }
+
+    // xotin: ayol, 25-35 yosh
+    const xotinYosh = 25 + Math.floor(rnd() * 11);
+    const xotinId = newPerson({ sex: "f", born: B.startYear - xotinYosh });
+    marry(me, xotinId, true);
+    P(xotinId).holat = "xotin";
+    S.xotinId = xotinId;
+
+    // qiz: ayol, 10-16 yosh, o'yinchining biologik qizi
+    const qizYosh = 10 + Math.floor(rnd() * 7);
+    const qizId = newPerson({
+      sex: "f", born: B.startYear - qizYosh,
+      fatherId: me, motherId: xotinId, surname: P(me).surname
+    });
+    P(qizId).consanguinity = 0.5;
+
     log("Boshlandi.");
     save();
     return S;

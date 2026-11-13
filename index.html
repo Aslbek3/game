@@ -8,9 +8,45 @@
 </head>
 <body>
 <div id="ilova">
-  <nav id="menyu"></nav>
-  <main id="korinish"></main>
+
+  <header id="sarlavha">
+    <button class="doira-tugma" id="menyuTugma">&#9776;</button>
+    <div class="nasl-nom">Nasl</div>
+    <div class="muhr">NASL</div>
+  </header>
+  <div id="menyuRoyxat" class="yashirin"></div>
+
+  <section id="malumot"></section>
+
+  <section id="lenta"></section>
+
+  <section id="statlar"></section>
+
 </div>
+
+<nav id="harakatPanel">
+  <button class="harakat-ustun" id="kasbTugma" disabled title="Hali mavjud emas">
+    <span class="ikon">&#128188;</span>Kasb
+  </button>
+  <button class="harakat-ustun" id="mulkTugma" disabled title="Hali mavjud emas">
+    <span class="ikon">&#127968;</span>Mulk
+  </button>
+  <button class="yosh-doira" id="yoshTugma">+ Yosh</button>
+  <button class="harakat-ustun" id="munosabatTugma">
+    <span class="ikon">&#128101;</span>Munosabat
+  </button>
+  <button class="harakat-ustun" id="harakatlarTugma">
+    <span class="ikon">&#9881;</span>Harakatlar
+  </button>
+</nav>
+
+<div id="sheet" class="yashirin">
+  <div class="sheet-ichki">
+    <div class="sheet-bosh"><button id="sheetYopish">&times;</button></div>
+    <div id="sheetTana"></div>
+  </div>
+</div>
+
 <div id="voqea" class="yashirin"><div class="oyna" id="voqeaOyna"></div></div>
 
 <script src="settings_extra.js"></script>
@@ -23,10 +59,11 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const ekranlar = { bosh: "Bosh", odamlar: "Odamlar", sozlamalar: "Sozlamalar", yangi: "Yangi o'yin" };
-let ekran = "bosh";
+let ekranSheet = null; // null | "odamlar" | "sozlamalar" | "yangi"
 let tanlangan = null;
+let menyuOchiq = false;
+let bankOchiq = false;
 
-// Sozlamalar yorlig'i va tanlovlari (faqat engine'dagi kalitlar)
 const yorliq = {
   nikoh: "Nikoh", lesbian: "Ayollar orasidagi munosabat", xxx: "Ochiq mazmun",
   matn: "Matn ochiqligi", olim: "O'lim", tasodif: "Tasodif", qiyinlik: "Qiyinlik"
@@ -45,40 +82,63 @@ function el(tag, matn, cls) {
   return e;
 }
 
-function menyu() {
-  const m = $("menyu"); m.innerHTML = "";
-  for (const [k, v] of Object.entries(ekranlar)) {
-    const b = el("button", v, k === ekran ? "faol" : "");
-    b.onclick = () => { ekran = k; tanlangan = null; render(); };
-    m.append(b);
-  }
+function statQator(yorliqMatn, qiymat, maks) {
+  const q = el("div", null, "stat-qator");
+  q.append(el("span", yorliqMatn, "stat-yorliq"));
+  const bar = el("div", null, "stat-bar");
+  const foiz = Math.max(0, Math.min(100, Math.round((qiymat / maks) * 100)));
+  const ich = el("i"); ich.style.width = foiz + "%";
+  const sonMatn = el("span", foiz + "%", "stat-foiz");
+  bar.append(ich, sonMatn);
+  q.append(bar);
+  return q;
 }
 
-function boshEkran(r, S) {
+function renderMalumot(S, B) {
+  const r = $("malumot"); r.innerHTML = "";
   const me = Nasl.person(S.playerId);
-  r.append(el("h2", `${Nasl.fullName(me)} — ${S.year}`));
-  const k = el("div", null, "blok korsatkich");
-  for (const [n, v] of [["Yosh", Nasl.age(me)], ["Pul", S.money], ["Qarz", S.debt], ["Obro'", S.honor]]) {
-    const s = el("span", n + ": "); s.append(el("b", v)); k.append(s);
-  }
-  r.append(k);
-  const t = el("button", S.flags.over ? "Nasl tugadi" : "Keyingi yil");
-  t.disabled = !!S.pending || !!S.flags.over;
-  t.onclick = () => Nasl.nextYear();
-  r.append(t);
-  const lb = el("div", null, "blok"); lb.id = "log";
-  S.log.slice().reverse().forEach(l => lb.append(el("div", `${l.year}: ${l.text}`)));
-  r.append(el("h3", "Voqealar tarixi"), lb);
+  r.append(el("div", me.name[0], "avatar"));
+  r.append(el("div", null, "bayroq"));
+
+  const info = el("div", null, "shaxs-info");
+  info.append(el("div", Nasl.fullName(me), "ism"));
+  info.append(el("div", (S.job && S.job.title) || "Ishsiz", "kasb"));
+  r.append(info);
+
+  const moliya = el("div", null, "moliya");
+  moliya.append(el("div", "$" + S.money, "pul-son"));
+  const bankTugma = el("button", "Bank hisobi", "bank-tugma");
+  bankTugma.onclick = () => { bankOchiq = !bankOchiq; renderMalumot(S, B); };
+  moliya.append(bankTugma);
+  if (bankOchiq) moliya.append(el("div", "Qarz: $" + S.debt, "qarz-qatori"));
+  r.append(moliya);
 }
 
-function odamlarEkran(r) {
-  r.append(el("h2", "Odamlar"));
-  Nasl.familyView().forEach(f => {
-    const q = el("div", null, "qator" + (f.alive ? "" : " vafot"));
-    q.append(el("span", f.name), el("span", `${f.rel} · ${f.age} yosh${f.alive ? "" : " · vafot"}`));
-    q.onclick = () => { tanlangan = f.id; render(); };
-    r.append(q);
+function renderLenta(S) {
+  const r = $("lenta"); r.innerHTML = "";
+  const me = Nasl.person(S.playerId);
+  const yillar = [];
+  for (const l of S.log) {
+    let guruh = yillar[yillar.length - 1];
+    if (!guruh || guruh.year !== l.year) { guruh = { year: l.year, matnlar: [] }; yillar.push(guruh); }
+    guruh.matnlar.push(l.text);
+  }
+  if (!yillar.length) { r.append(el("div", "Voqealar yo'q.", "lenta-matn")); return; }
+  yillar.forEach(g => {
+    r.append(el("div", `${g.year} — Yosh: ${g.year - me.born}`, "lenta-sarlavha"));
+    g.matnlar.forEach(m => r.append(el("div", m, "lenta-matn")));
   });
+  r.scrollTop = r.scrollHeight;
+}
+
+function renderStatlar(S, B) {
+  const r = $("statlar"); r.innerHTML = "";
+  const xotin = S.xotinId != null ? Nasl.person(S.xotinId) : null;
+  r.append(statQator("Mehr", (xotin && xotin.mehr) || 0, B.statMax));
+  r.append(statQator("Ishonch", (xotin && xotin.ishonch) || 0, B.statMax));
+  r.append(statQator("Shubha", (xotin && xotin.shubha) || 0, B.statMax));
+  r.append(statQator("Obro'", S.honor, B.honorMax));
+  r.append(statQator("Yosh", Nasl.age(Nasl.person(S.playerId)), B.maxAge));
 }
 
 function holatMatni(p) {
@@ -87,10 +147,20 @@ function holatMatni(p) {
   return "yolg'iz";
 }
 
+function odamlarEkran(r) {
+  r.append(el("h2", "Odamlar"));
+  Nasl.familyView().forEach(f => {
+    const q = el("div", null, "qator" + (f.alive ? "" : " vafot"));
+    q.append(el("span", f.name), el("span", `${f.rel} · ${f.age} yosh${f.alive ? "" : " · vafot"}`));
+    q.onclick = () => { tanlangan = f.id; renderSheet(); };
+    r.append(q);
+  });
+}
+
 function kartochka(r, S) {
   const p = Nasl.person(tanlangan);
   const orqaga = el("button", "← Ro'yxatga");
-  orqaga.onclick = () => { tanlangan = null; render(); };
+  orqaga.onclick = () => { tanlangan = null; renderSheet(); };
   r.append(orqaga, el("h2", Nasl.fullName(p)));
   const b = el("div", null, "blok");
   [
@@ -131,7 +201,7 @@ function sozlamalarEkran(r, S) {
     q.append(el("span", yorliq[k]));
     if (typeof v === "boolean") {
       const t = el("button", v ? "Yoqilgan" : "O'chiq");
-      t.onclick = () => { S.settings[k] = !v; Nasl.save(); render(); };
+      t.onclick = () => { S.settings[k] = !v; Nasl.save(); renderSheet(); };
       q.append(t);
     } else {
       const s = document.createElement("select");
@@ -150,7 +220,7 @@ function sozlamalarEkran(r, S) {
   const i = el("button", "Import");
   i.onclick = () => {
     if (ta.classList.contains("yashirin")) { ta.classList.remove("yashirin"); ta.value = ""; return; }
-    try { Nasl.importJSON(ta.value); render(); } catch (x) { ta.value = "Xato: JSON noto'g'ri"; }
+    try { Nasl.importJSON(ta.value); renderSheet(); } catch (x) { ta.value = "Xato: JSON noto'g'ri"; }
   };
   r.append(e, i, ta);
 }
@@ -159,8 +229,36 @@ function yangiEkran(r) {
   r.append(el("h2", "Yangi o'yin"));
   r.append(el("p", "Joriy saqlash o'chiriladi."));
   const t = el("button", "Boshlash");
-  t.onclick = () => { Nasl.newGame(); ekran = "bosh"; render(); };
+  t.onclick = () => { Nasl.newGame(); ekranSheet = null; tanlangan = null; render(); };
   r.append(t);
+}
+
+function renderSheet() {
+  const sheet = $("sheet");
+  if (!ekranSheet) { sheet.classList.add("yashirin"); return; }
+  sheet.classList.remove("yashirin");
+  const r = $("sheetTana"); r.innerHTML = "";
+  const S = Nasl.state;
+  if (ekranSheet === "odamlar") (tanlangan != null ? kartochka(r, S) : odamlarEkran(r));
+  else if (ekranSheet === "sozlamalar") sozlamalarEkran(r, S);
+  else if (ekranSheet === "yangi") yangiEkran(r);
+}
+
+function renderMenyuRoyxat() {
+  const m = $("menyuRoyxat");
+  if (!menyuOchiq) { m.classList.add("yashirin"); return; }
+  m.innerHTML = "";
+  for (const [k, v] of Object.entries(ekranlar)) {
+    const b = el("button", v);
+    b.onclick = () => {
+      menyuOchiq = false;
+      ekranSheet = k === "bosh" ? null : k;
+      tanlangan = null;
+      render();
+    };
+    m.append(b);
+  }
+  m.classList.remove("yashirin");
 }
 
 function voqeaOyna(S) {
@@ -179,14 +277,21 @@ function voqeaOyna(S) {
 function render() {
   const S = Nasl.state;
   if (!S) return;
-  menyu();
-  const r = $("korinish"); r.innerHTML = "";
-  if (ekran === "bosh") boshEkran(r, S);
-  else if (ekran === "odamlar") (tanlangan != null ? kartochka(r, S) : odamlarEkran(r));
-  else if (ekran === "sozlamalar") sozlamalarEkran(r, S);
-  else yangiEkran(r);
+  const B = Nasl.balance;
+  renderMalumot(S, B);
+  renderLenta(S);
+  renderStatlar(S, B);
+  renderMenyuRoyxat();
+  renderSheet();
   voqeaOyna(S);
+  $("yoshTugma").disabled = !!(S.pending || S.flags.over);
 }
+
+$("menyuTugma").onclick = () => { menyuOchiq = !menyuOchiq; renderMenyuRoyxat(); };
+$("sheetYopish").onclick = () => { ekranSheet = null; tanlangan = null; render(); };
+$("yoshTugma").onclick = () => Nasl.nextYear();
+$("munosabatTugma").onclick = () => { ekranSheet = "odamlar"; tanlangan = null; render(); };
+$("harakatlarTugma").onclick = () => { ekranSheet = "sozlamalar"; render(); };
 
 Nasl.init(".").then(render);
 </script>

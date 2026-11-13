@@ -1,0 +1,2 @@
+window.SETTINGS_EXTRA = { incest: 'qulf', predofiliya: 8, zorlash: true };
+window.bilanQosh = function (s) { return Object.assign({}, window.SETTINGS_EXTRA, s); };

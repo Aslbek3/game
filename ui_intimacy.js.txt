@@ -1,0 +1,93 @@
+(function () {
+  const S = () => window.Nasl.S;
+  const yangila = () => { if (window.Nasl.yangila) window.Nasl.yangila(); };
+
+  const YORLIQ = {
+    suhbat: 'Suhbat', sovga: "Sovg'a", alkogol: 'Alkogol',
+    afrodizyak: 'Afrodizyak', massaj: 'Massaj', ofuro: "O'furo",
+    tungi: 'Tungi tashrif', majburiy: "Zo'rlash"
+  };
+
+  function sabab(p, usul, b, s) {
+    if (!p || p.alive === false) return 'tirik emas';
+    if (p.age < (s.yoshChegara ?? b.intimacyAge)) return 'yosh kichik';
+    if ((p.consanguinity || 0) > 0 && s.qonMunosabat === 'ochiq_emas') return 'qon munosabat yopiq';
+    const m = b.methods[usul];
+    if (!m) return 'usul yoq';
+    if ((p.affection || 0) < (m.affectionMin || 0)) return 'mehr yetarli emas';
+    if (m.needsNight && !S().night) return 'kech emas';
+    if ((S().money || 0) < (m.cost || 0)) return 'pul yetarli emas';
+    return null;
+  }
+
+  window.usullarniChiz = function (el, state, b, id) {
+    if (!el) return;
+    const p = state.people.find(x => x.id === id);
+    if (!p) return;
+    const s = window.bilanQosh(state.settings || {});
+    el.innerHTML = '';
+
+    for (const usul in b.methods) {
+      const m = b.methods[usul];
+      if (usul === 'majburiy' && s.majburiyUsul === false) continue;
+      const nuqson = sabab(p, usul, b, s);
+      const tugma = document.createElement('button');
+      tugma.className = 'usul';
+      tugma.innerHTML = '<b>' + (YORLIQ[usul] || usul) + '</b>'
+        + (m.cost ? '<small>$' + m.cost + '</small>' : '')
+        + (nuqson ? '<small class="sabab">' + nuqson + '</small>' : '');
+      tugma.disabled = !!nuqson;
+      tugma.onclick = () => {
+        const natija = window.urinish(state, id, usul, b);
+        if (!natija.ok) { yangila(); return; }
+        if (window.Nasl.yoz) {
+          window.Nasl.yoz(p.name + ' — ' + (YORLIQ[usul] || usul)
+            + (natija.muvaffaqiyat ? '' : ' (o\'tmadi)')
+            + (natija.homilador ? '. Homilador.' : '.'));
+        }
+        yangila();
+      };
+      el.appendChild(tugma);
+    }
+  };
+
+  window.extraSozlamalarniChiz = function (el, state) {
+    if (!el) return;
+    el.innerHTML = '';
+    const yorliq = { qonMunosabat: 'Incest', yoshChegara: 'Pedofiliya chegarasi', majburiyUsul: "Zo'rlash" };
+    const tanlov = { qonMunosabat: ['qulf', 'ochiq', 'ochiq_emas'], yoshChegara: [6, 8, 10] };
+
+    for (const kalit in window.SETTINGS_EXTRA) {
+      const qator = document.createElement('div');
+      qator.className = 'sozlama';
+      const nom = document.createElement('span');
+      nom.textContent = yorliq[kalit] || kalit;
+      qator.appendChild(nom);
+
+      if (tanlov[kalit]) {
+        const sel = document.createElement('select');
+        tanlov[kalit].forEach(v => {
+          const o = document.createElement('option');
+          o.value = v;
+          o.textContent = kalit === 'qonMunosabat'
+            ? ({ qulf: 'Qulf bilan', ochiq: 'Ochiq', ochiq_emas: "O'chirilgan" })[v]
+            : v;
+          if (String(state.settings[kalit]) === String(v)) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.onchange = () => {
+          state.settings[kalit] = isNaN(sel.value) ? sel.value : +sel.value;
+          yangila();
+        };
+        qator.appendChild(sel);
+      } else {
+        const ch = document.createElement('input');
+        ch.type = 'checkbox';
+        ch.checked = !!state.settings[kalit];
+        ch.onchange = () => { state.settings[kalit] = ch.checked; yangila(); };
+        qator.appendChild(ch);
+      }
+      el.appendChild(qator);
+    }
+  };
+})();

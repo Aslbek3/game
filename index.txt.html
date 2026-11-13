@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nasl</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="ilova">
+  <nav id="menyu"></nav>
+  <main id="korinish"></main>
+</div>
+<div id="voqea" class="yashirin"><div class="oyna" id="voqeaOyna"></div></div>
+
+<script src="engine.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const ekranlar = { bosh: "Bosh", odamlar: "Odamlar", sozlamalar: "Sozlamalar", yangi: "Yangi o'yin" };
+let ekran = "bosh";
+let tanlangan = null;
+
+// Sozlamalar yorlig'i va tanlovlari (faqat engine'dagi kalitlar)
+const yorliq = {
+  nikoh: "Nikoh", lesbian: "Ayollar orasidagi munosabat", xxx: "Ochiq mazmun",
+  matn: "Matn ochiqligi", olim: "O'lim", tasodif: "Tasodif", qiyinlik: "Qiyinlik"
+};
+const tanlov = {
+  nikoh: ["mono", "kop", "cheksiz"],
+  matn: ["ishora", "orta", "ochiq"],
+  tasodif: ["past", "orta", "yuqori"],
+  qiyinlik: ["yumshoq", "normal", "qattiq"]
+};
+
+function el(tag, matn, cls) {
+  const e = document.createElement(tag);
+  if (matn != null) e.textContent = matn;
+  if (cls) e.className = cls;
+  return e;
+}
+
+function menyu() {
+  const m = $("menyu"); m.innerHTML = "";
+  for (const [k, v] of Object.entries(ekranlar)) {
+    const b = el("button", v, k === ekran ? "faol" : "");
+    b.onclick = () => { ekran = k; tanlangan = null; render(); };
+    m.append(b);
+  }
+}
+
+function boshEkran(r, S) {
+  const me = Nasl.person(S.playerId);
+  r.append(el("h2", `${Nasl.fullName(me)} — ${S.year}`));
+  const k = el("div", null, "blok korsatkich");
+  for (const [n, v] of [["Yosh", Nasl.age(me)], ["Pul", S.money], ["Qarz", S.debt], ["Obro'", S.honor]]) {
+    const s = el("span", n + ": "); s.append(el("b", v)); k.append(s);
+  }
+  r.append(k);
+  const t = el("button", S.flags.over ? "Nasl tugadi" : "Keyingi yil");
+  t.disabled = !!S.pending || !!S.flags.over;
+  t.onclick = () => Nasl.nextYear();
+  r.append(t);
+  const lb = el("div", null, "blok"); lb.id = "log";
+  S.log.slice().reverse().forEach(l => lb.append(el("div", `${l.year}: ${l.text}`)));
+  r.append(el("h3", "Voqealar tarixi"), lb);
+}
+
+function odamlarEkran(r) {
+  r.append(el("h2", "Odamlar"));
+  Nasl.familyView().forEach(f => {
+    const q = el("div", null, "qator" + (f.alive ? "" : " vafot"));
+    q.append(el("span", f.name), el("span", `${f.rel} · ${f.age} yosh${f.alive ? "" : " · vafot"}`));
+    q.onclick = () => { tanlangan = f.id; render(); };
+    r.append(q);
+  });
+}
+
+function holatMatni(p) {
+  if (p.diedYear != null) return "vafot etgan";
+  if (p.spouses.length) return "nikohda";
+  return "yolg'iz";
+}
+
+function kartochka(r, S) {
+  const p = Nasl.person(tanlangan);
+  const orqaga = el("button", "← Ro'yxatga");
+  orqaga.onclick = () => { tanlangan = null; render(); };
+  r.append(orqaga, el("h2", Nasl.fullName(p)));
+  const b = el("div", null, "blok");
+  [
+    ["Yosh", Nasl.age(p)],
+    ["Qarindoshlik", Nasl.relation(S.playerId, p.id)],
+    ["Holat", holatMatni(p)],
+    ["Tug'ilgan yil", p.born]
+  ].forEach(([n, v]) => b.append(el("div", `${n}: ${v}`)));
+  r.append(b);
+  const B = Nasl.balance;
+  const shubha = p.suspicion <= B.suspicionCalmMax ? "tinch" : (p.suspicion <= B.suspicionDoubtMax ? "shubhalanmoqda" : "ishonchi yo'q");
+  const barlar = el("div", null, "blok");
+  [["Mehr", p.affection, ""], ["Shubha", p.suspicion, shubha]].forEach(([n, v, s]) => {
+    barlar.append(el("div", `${n}: ${v}${s ? " — " + s : ""}`));
+    const bar = el("div", null, "bar"); const ich = el("i");
+    ich.style.width = `${v / B.statMax * B.statMax}%`;
+    bar.append(ich); barlar.append(bar);
+  });
+  r.append(barlar);
+  r.append(el("h3", "Tarix"));
+  const t = el("div", null, "blok");
+  const ism = p.name;
+  const qayd = S.log.filter(l => l.text.includes(ism)).slice().reverse();
+  if (!qayd.length) t.append(el("div", "Yozuv yo'q."));
+  qayd.forEach(l => t.append(el("div", `${l.year}: ${l.text}`)));
+  r.append(t);
+}
+
+function sozlamalarEkran(r, S) {
+  r.append(el("h2", "Sozlamalar"));
+  const b = el("div", null, "blok");
+  for (const [k, v] of Object.entries(S.settings)) {
+    if (!(k in yorliq)) continue;
+    const q = el("div", null, "sozlama");
+    q.append(el("span", yorliq[k]));
+    if (typeof v === "boolean") {
+      const t = el("button", v ? "Yoqilgan" : "O'chiq");
+      t.onclick = () => { S.settings[k] = !v; Nasl.save(); render(); };
+      q.append(t);
+    } else {
+      const s = document.createElement("select");
+      (tanlov[k] || [v]).forEach(o => { const op = el("option", o); op.value = o; if (o === v) op.selected = true; s.append(op); });
+      s.onchange = () => { S.settings[k] = s.value; Nasl.save(); };
+      q.append(s);
+    }
+    b.append(q);
+  }
+  r.append(b);
+  const ta = document.createElement("textarea"); ta.className = "yashirin";
+  const e = el("button", "Eksport"); e.onclick = () => { ta.classList.remove("yashirin"); ta.value = Nasl.exportJSON(); };
+  const i = el("button", "Import");
+  i.onclick = () => {
+    if (ta.classList.contains("yashirin")) { ta.classList.remove("yashirin"); ta.value = ""; return; }
+    try { Nasl.importJSON(ta.value); render(); } catch (x) { ta.value = "Xato: JSON noto'g'ri"; }
+  };
+  r.append(e, i, ta);
+}
+
+function yangiEkran(r) {
+  r.append(el("h2", "Yangi o'yin"));
+  r.append(el("p", "Joriy saqlash o'chiriladi."));
+  const t = el("button", "Boshlash");
+  t.onclick = () => { Nasl.newGame(); ekran = "bosh"; render(); };
+  r.append(t);
+}
+
+function voqeaOyna(S) {
+  const v = $("voqea"), o = $("voqeaOyna");
+  const ev = S.pending && Nasl.events.find(e => e.id === S.pending);
+  if (!ev) { v.classList.add("yashirin"); return; }
+  v.classList.remove("yashirin"); o.innerHTML = "";
+  o.append(el("h3", ev.title || "Voqea"), el("p", ev.text));
+  ev.choices.forEach((c, i) => {
+    const b = el("button", c.label);
+    b.onclick = () => { Nasl.choose(i); render(); };
+    o.append(b);
+  });
+}
+
+function render() {
+  const S = Nasl.state;
+  if (!S) return;
+  menyu();
+  const r = $("korinish"); r.innerHTML = "";
+  if (ekran === "bosh") boshEkran(r, S);
+  else if (ekran === "odamlar") (tanlangan != null ? kartochka(r, S) : odamlarEkran(r));
+  else if (ekran === "sozlamalar") sozlamalarEkran(r, S);
+  else yangiEkran(r);
+  voqeaOyna(S);
+}
+
+Nasl.init(".").then(render);
+</script>
+</body>
+</html>

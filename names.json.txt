@@ -1,0 +1,5 @@
+{
+  "ayol": ["Nilufar","Dilnoza","Sevara","Malika","Zulfiya","Kamola","Aziza","Madina","Shahzoda","Gulnora","Nargiza","Dildora","Sevinch","Munisa","Robiya","Oysha","Zebo","Feruza","Nasiba","Yulduz"],
+  "erkak": ["Bekzod","Aziz","Timur","Jasur","Sardor","Ulug'bek","Rustam","Farrux","Otabek","Sanjar","Doston","Alisher","Sherzod","Behruz","Kamron"],
+  "familiya": ["Karimov","Toshpo'latov","Yo'ldoshev","Rahimov","Saidov","Nazarov","Qodirov","Xolmatov","Ergashev","Sultonov"]
+}

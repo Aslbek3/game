@@ -1,0 +1,97 @@
+// resolve_year.js
+ 
+
+const chegara = (v, min, max) => Math.max(min, Math.min(max, v));
+
+window.resolveYear = function (S, B) {
+  const natija = { yozuv: [], olmadi: false };
+S.children = S.children || [];
+  const qiyin = (S.settings && B.difficulty[S.settings.qiyinlik]) || { income: 1, cost: 1, suspicion: 1, discovery: 1 };
+
+  // daromad
+  const maosh = (S.job && S.job.salary) || B.yearlyIncomeBase;
+  S.money += Math.round(maosh * qiyin.income);
+
+  // xarajat
+  S.money -= Math.round(B.yearlyCostPerPerson * (S.people.length + 1) * qiyin.cost);
+
+  // aliment
+  const sobiq = S.people.filter(p => p.sobiq && p.alive);
+  for (const p of sobiq) S.money -= Math.round(maosh * B.alimony);
+
+  // qarz
+  if (S.debt > 0) S.debt = Math.round(S.debt * (1 + B.debtInterestRate));
+
+  // pul manfiy bo'lsa qarzga o'tadi
+  if (S.money < 0) { S.debt += -S.money; S.money = 0; }
+
+  // shubha
+  for (const p of S.people) {
+    if (!p.alive || p.holat !== 'yashirin') continue;
+    const o'sish = B.suspicionPerYear * qiyin.suspicion * (p.yaqinlik ? 1 : 0.5);
+    p.suspicion = chegara((p.suspicion || 0) + o'sish, 0, 100);
+  }
+
+  // fosh
+  for (const p of S.people) {
+    if (!p.alive || p.holat !== 'yashirin') continue;
+    if ((p.suspicion || 0) < B.suspicionThreshold) continue;
+    const ehtimol = B.discoveryBase * qiyin.discovery;
+    if (Math.random() < ehtimol) {
+      p.holat = 'sevgili';
+      p.suspicion = 0;
+      if (p.xotinId) {
+        const x = S.people.find(q => q.id === p.xotinId);
+        if (x) x.trust = chegara((x.trust || 0) - B.honorLossOnReveal, 0, 100);
+      }
+      natija.yozuv.push({ turi: 'fosh', id: p.id });
+    }
+  }
+
+  // homiladorlik
+  for (const p of S.people) {
+    if (!p.alive || !p.pregnant) continue;
+    p.pregnant.months = (p.pregnant.months || 0) + 12;
+    if (p.pregnant.months < 9) continue;
+
+    const ota = S.people.find(q => q.id === p.pregnant.fatherId);
+    const jins = Math.random() < B.maleBirthChance ? 'm' : 'f';
+    let bola;
+    if (typeof S.bolaYarat === 'function') bola = S.bolaYarat(S, ota, p, jins);
+    else {
+      bola = { id: 'b' + Math.random().toString(36).slice(2, 9), age: 0, jins, alive: true,
+               affection: 50, trust: 50, suspicion: 0, yaqinlik: false,
+               consanguinity: 0, holat: null, onaId: p.id, otaId: p.pregnant.fatherId };
+      S.people.push(bola);
+    }
+    S.children.push(bola.id);
+    p.pregnant = null;
+
+    if (Math.random() < B.motherDeathChance) { p.alive = false; natija.yozuv.push({ turi: 'onolim', id: p.id }); }
+    if (Math.random() < B.infantDeathChance) { bola.alive = false; natija.yozuv.push({ turi: 'bolaalim', id: bola.id }); }
+
+    natija.yozuv.push({ turi: 'tugilish', id: bola.id, ona: p.id });
+  }
+
+  // qarish
+  S.age += 1;
+  S.year += 1;
+  for (const p of S.people) if (p.alive) p.age += 1;
+
+  // o'lim
+  const olimEhtimol = (jadval, yosh) => {
+    for (const [y, e] of jadval) if (yosh <= y) return e;
+    return 0.4;
+  };
+  if (Math.random() < olimEhtimol(B.deathByAge, S.age)) { S.player.alive = false; natija.olmadi = true; }
+
+  for (const p of S.people) {
+    if (!p.alive) continue;
+    if (Math.random() < olimEhtimol(B.deathByAge, p.age)) { p.alive = false; natija.yozuv.push({ turi: 'olim', id: p.id }); }
+  }
+
+  // kech
+  if (Math.random() < B.nightFlipChance) S.night = !S.night;
+
+  return natija;
+};

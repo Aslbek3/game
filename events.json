@@ -1,0 +1,45 @@
+[
+  {
+    "id": "mol_hosil",
+    "title": "Hosil yili",
+    "weight": 3,
+    "cond": { "minAge": 18 },
+    "text": "Bu yil hosil yaxshi bo'ldi.",
+    "choices": [
+      { "label": "Sotish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallGain" }] },
+      { "label": "Qo'shnilarga ulashish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorGain" }] }
+    ]
+  },
+  {
+    "id": "qurgoqchilik",
+    "title": "Qurg'oqchilik",
+    "weight": 2,
+    "cond": { "minAge": 18 },
+    "text": "Qurg'oqchilik yilni og'irlashtirdi.",
+    "choices": [
+      { "label": "Zaxiradan sarflash", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallLoss" }] }
+    ]
+  },
+  {
+    "id": "yangi_xotin",
+    "title": "Nikoh taklifi",
+    "weight": 2,
+    "cond": { "minAge": 18, "maxSpousesNotReached": true, "hasEligibleSingle": true },
+    "text": "Kelishuv bo'yicha yangi nikoh taklif qilindi.",
+    "choices": [
+      { "label": "Rozilik", "effects": [{ "op": "marryEligible" }] },
+      { "label": "Rad etish", "effects": [{ "op": "stat", "key": "honor", "deltaKey": "eventHonorLoss" }] }
+    ]
+  },
+  {
+    "id": "sir_ochildi",
+    "title": "Oshkor bo'lgan sir",
+    "weight": 2,
+    "cond": { "hasConcealedPaternity": true },
+    "text": "Bir bolaning otaligi haqida gap tarqaldi.",
+    "choices": [
+      { "label": "Yopib qo'yish", "effects": [{ "op": "stat", "key": "money", "deltaKey": "eventSmallLoss" }] },
+      { "label": "Haqiqatni tan olish", "effects": [{ "op": "revealPaternity" }] }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+# Nasl — shartnoma
+
+Ma'noni tushunishga urinma. Jadval bo'yicha bajar, ortiqcha o'ylama.
+
+## Kalitlar
+
+qonMunosabat: qulf | ochiq | ochiq_emas        (standart: qulf)
+yoshChegara: 6 | 8 | 10                        (standart: 8)
+majburiyUsul: true | false                     (standart: true)
+nikoh: mono | kop | cheksiz                    (standart: kop)
+lesbian: true | false                          (standart: false)
+xxx: true | false                              (standart: false)
+matn: ishora | orta | ochiq                    (standart: orta)
+olim: true | false                             (standart: false)
+tasodif: past | orta | yuqori                  (standart: orta)
+qiyinlik: yumshoq | normal | qattiq            (standart: yumshoq)
+
+methods: suhbat, sovga, alkogol, afrodizyak, massaj, ofuro, tungi, majburiy
+
+## Fayllar
+
+balance.json, events.json, names.json, engine.js, aloqa.js, resolve_year.js,
+save.js, ui_intimacy.js, ui_main.js, ui_person.js, ui_scene.js, ui_settings.js,
+ui_create.js, index.html, style.css
+
+## Sen yozasan
+
+engine.js, resolve_year.js, save.js, index.html, style.css, ui_*.js (ui_intimacy
+dan tashqari), balance.json, events.json skeleti.
+
+## Sen yozmaysan
+
+aloqa.js, settings_extra.js, ui_intimacy.js, names.json, voqealar matni.
+
+## Shaxs maydonlari
+
+id, name, age, jins ('f'|'m'), alive, relation, consanguinity, holat, yaqinlik,
+affection, trust, suspicion, pregnant, history
+
+## Holat maydonlari
+
+year, age, money, debt, night, balance, settings, player, people, children, xotinId
+
+## applyEffect op'lari
+
+affection, suspicion, trust, money, honor, stat, intimacy, pregnancy,
+concealPaternity, abort, discovery, retry
+
+## Voqea formati
+
+{ id, title, weight, cond, text, choices[{ label, effects[{op, v}] }] }
+
+cond: relation, yaqinlik, pregnant, affectionMin, minAge, night, wifeAway

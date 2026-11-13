@@ -22,7 +22,7 @@
 
   window.usullarniChiz = function (el, state, b, id) {
     if (!el) return;
-    const p = state.people.find(x => x.id === id);
+    const p = state.people[id];
     if (!p) return;
     const s = window.bilanQosh(state.settings || {});
     el.innerHTML = '';

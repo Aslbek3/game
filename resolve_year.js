@@ -28,8 +28,8 @@ S.children = S.children || [];
   // shubha
   for (const p of S.people) {
     if (!p.alive || p.holat !== 'yashirin') continue;
-    const o'sish = B.shubhaPerYear * qiyin.shubha * (p.aloqa ? 1 : 0.5);
-    p.shubha = chegara((p.shubha || 0) + o'sish, 0, 100);
+    const osish = B.shubhaPerYear * qiyin.shubha * (p.aloqa ? 1 : 0.5);
+    p.shubha = chegara((p.shubha || 0) + osish, 0, 100);
   }
 
   // fosh

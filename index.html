@@ -13,9 +13,11 @@
 </div>
 <div id="voqea" class="yashirin"><div class="oyna" id="voqeaOyna"></div></div>
 
-<script src="engine.js"></script>
+<script src="settings_extra.js"></script>
 <script src="aloqa.js"></script>
 <script src="tekshir.js"></script>
+<script src="resolve_year.js"></script>
+<script src="engine.js"></script>
 <script src="ui_intimacy.js"></script>
 <script>
 "use strict";
@@ -108,6 +110,9 @@ function kartochka(r, S) {
     bar.append(ich); barlar.append(bar);
   });
   r.append(barlar);
+  const usullar = el("div"); usullar.id = "usullar";
+  r.append(usullar);
+  if (window.usullarniChiz) window.usullarniChiz(usullar, S, B, p.id);
   r.append(el("h3", "Tarix"));
   const t = el("div", null, "blok");
   const ism = p.name;
@@ -137,6 +142,9 @@ function sozlamalarEkran(r, S) {
     b.append(q);
   }
   r.append(b);
+  const extraSozlamalar = el("div"); extraSozlamalar.id = "extra-sozlamalar";
+  r.append(extraSozlamalar);
+  if (window.extraSozlamalarniChiz) window.extraSozlamalarniChiz(extraSozlamalar, S);
   const ta = document.createElement("textarea"); ta.className = "yashirin";
   const e = el("button", "Eksport"); e.onclick = () => { ta.classList.remove("yashirin"); ta.value = Nasl.exportJSON(); };
   const i = el("button", "Import");

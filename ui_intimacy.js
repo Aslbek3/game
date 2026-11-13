@@ -4,7 +4,7 @@
 
   const YORLIQ = {
     suhbat: 'Suhbat', sovga: "Sovg'a", alkogol: 'Alkogol',
-    afrodizyak: 'Afrodizyak', massaj: 'Massaj', ofuro: "O'furo",
+    afrodizyak: 'Afrodizyak', massaj: 'Massaj', ofuro: 'Hammom',
     tungi: 'Tungi tashrif', majbur: "Zo'rlash"
   };
 

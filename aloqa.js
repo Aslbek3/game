@@ -15,7 +15,7 @@ function fertillik(yosh, jadval) {
   return 0;
 }
 
-window.urinish = function (state, personId, method, balance) {
+window.amal = function (state, personId, method, balance) {
   const b = balance || state.balance;
   if (!b) return { ok: false, sabab: 'balans yoq' };
 
@@ -24,44 +24,44 @@ window.urinish = function (state, personId, method, balance) {
   if (shaxs.alive === false) return { ok: false, sabab: 'tirik emas' };
 
   const s = window.bilanQosh(state.settings || {});
-  if (shaxs.age < (s.predofiliya ?? b.intimacyAge)) return { ok: false, sabab: 'yosh kichik' };
-  if ((shaxs.consanguinity || 0) > 0 && s.incest === 'ochiq_emas')
+  if (shaxs.age < (s.yosh ?? b.intimacyAge)) return { ok: false, sabab: 'yosh kichik' };
+  if ((shaxs.consanguinity || 0) > 0 && s.qon === 'ochiq_emas')
     return { ok: false, sabab: 'qarindosh, qulf yopiq' };
 
   const m = b.methods && b.methods[method];
   if (!m) return { ok: false, sabab: 'usul yoq' };
-  if ((shaxs.affection || 0) < (m.affectionMin || 0)) return { ok: false, sabab: 'yaqinlik yetarli emas' };
-  if (m.needsNight && !state.night) return { ok: false, sabab: 'kech emas' };
-  if ((state.money || 0) < (m.cost || 0)) return { ok: false, sabab: 'pul yetarli emas' };
+  if ((shaxs.mehr || 0) < (m.aloqaMin || 0)) return { ok: false, sabab: 'aloqa yetarli emas' };
+  if (m.kech && !state.night) return { ok: false, sabab: 'kech emas' };
+  if ((state.money || 0) < (m.narx || 0)) return { ok: false, sabab: 'pul yetarli emas' };
 
-  state.money -= (m.cost || 0);
+  state.money -= (m.narx || 0);
 
-  const kop = (b.difficulty && b.difficulty[s.qiyinlik]) ? b.difficulty[s.qiyinlik].suspicion : 1;
-  const muvaffaqiyat = method === 'majburiy' ? true : Math.random() < m.success;
+  const kop = (b.difficulty && b.difficulty[s.qiyinlik]) ? b.difficulty[s.qiyinlik].shubha : 1;
+  const muvaffaqiyat = method === 'majbur' ? true : Math.random() < m.ehtimol;
 
-  shaxs.suspicion = Math.min(100, (shaxs.suspicion || 0) + (m.suspicion || 0) * kop);
-  if (m.affectionDelta) {
-    shaxs.affection = Math.max(0, Math.min(100, (shaxs.affection || 0) + m.affectionDelta));
+  shaxs.shubha = Math.min(100, (shaxs.shubha || 0) + (m.shubha || 0) * kop);
+  if (m.mehrFarq) {
+    shaxs.mehr = Math.max(0, Math.min(100, (shaxs.mehr || 0) + m.mehrFarq));
   }
 
   let homilador = false;
 
   if (muvaffaqiyat) {
-    if (!shaxs.yaqinlik) {
-      shaxs.yaqinlik = true;
-      shaxs.affection = Math.min(100, (shaxs.affection || 0) + 2);
+    if (!shaxs.aloqa) {
+      shaxs.aloqa = true;
+      shaxs.mehr = Math.min(100, (shaxs.mehr || 0) + 2);
     }
     const ayol = shaxs.jins === 'f';
     const fertile = shaxs.age >= b.fertileMinAge && shaxs.age <= b.fertileMaxAgeF;
     if (ayol && fertile && !shaxs.pregnant) {
-      const p = (b.pregnancyRate || 0) * fertillik(shaxs.age, b.fertilityByAge) / 100;
+      const p = (b.homiladorlikFoiz || 0) * fertillik(shaxs.age, b.fertillikJadvali) / 100;
       if (Math.random() < p) {
         shaxs.pregnant = { fatherId: state.player.id, months: 0, knownByPlayer: false };
         homilador = true;
       }
     }
   } else {
-    shaxs.affection = Math.max(0, (shaxs.affection || 0) - 3);
+    shaxs.mehr = Math.max(0, (shaxs.mehr || 0) - 3);
   }
 
   return { ok: true, muvaffaqiyat, homilador };

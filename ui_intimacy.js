@@ -5,7 +5,7 @@
   const YORLIQ = {
     suhbat: 'Suhbat', sovga: "Sovg'a", alkogol: 'Alkogol',
     afrodizyak: 'Afrodizyak', massaj: 'Massaj', ofuro: "O'furo",
-    tungi: 'Tungi tashrif', majburiy: "Zo'rlash"
+    tungi: 'Tungi tashrif', majbur: "Zo'rlash"
   };
 
   function sabab(p, usul, b, s) {
@@ -14,9 +14,9 @@
     if ((p.consanguinity || 0) > 0 && s.qonMunosabat === 'ochiq_emas') return 'qon munosabat yopiq';
     const m = b.methods[usul];
     if (!m) return 'usul yoq';
-    if ((p.affection || 0) < (m.affectionMin || 0)) return 'mehr yetarli emas';
-    if (m.needsNight && !S().night) return 'kech emas';
-    if ((S().money || 0) < (m.cost || 0)) return 'pul yetarli emas';
+    if ((p.mehr || 0) < (m.aloqaMin || 0)) return 'mehr yetarli emas';
+    if (m.kech && !S().night) return 'kech emas';
+    if ((S().money || 0) < (m.narx || 0)) return 'pul yetarli emas';
     return null;
   }
 
@@ -29,16 +29,16 @@
 
     for (const usul in b.methods) {
       const m = b.methods[usul];
-      if (usul === 'majburiy' && s.majburiyUsul === false) continue;
+      if (usul === 'majbur' && s.majburUsul === false) continue;
       const nuqson = sabab(p, usul, b, s);
       const tugma = document.createElement('button');
       tugma.className = 'usul';
       tugma.innerHTML = '<b>' + (YORLIQ[usul] || usul) + '</b>'
-        + (m.cost ? '<small>$' + m.cost + '</small>' : '')
+        + (m.narx ? '<small>$' + m.narx + '</small>' : '')
         + (nuqson ? '<small class="sabab">' + nuqson + '</small>' : '');
       tugma.disabled = !!nuqson;
       tugma.onclick = () => {
-        const natija = window.urinish(state, id, usul, b);
+        const natija = window.amal(state, id, usul, b);
         if (!natija.ok) { yangila(); return; }
         if (window.Nasl.yoz) {
           window.Nasl.yoz(p.name + ' — ' + (YORLIQ[usul] || usul)
@@ -54,7 +54,7 @@
   window.extraSozlamalarniChiz = function (el, state) {
     if (!el) return;
     el.innerHTML = '';
-    const yorliq = { qonMunosabat: 'Incest', yoshChegara: 'Pedofiliya chegarasi', majburiyUsul: "Zo'rlash" };
+    const yorliq = { qonMunosabat: 'Incest', yoshChegara: 'Pedofiliya chegarasi', majburUsul: "Zo'rlash" };
     const tanlov = { qonMunosabat: ['qulf', 'ochiq', 'ochiq_emas'], yoshChegara: [6, 8, 10] };
 
     for (const kalit in window.SETTINGS_EXTRA) {

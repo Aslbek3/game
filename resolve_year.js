@@ -6,14 +6,14 @@ const chegara = (v, min, max) => Math.max(min, Math.min(max, v));
 window.resolveYear = function (S, B) {
   const natija = { yozuv: [], olmadi: false };
 S.children = S.children || [];
-  const qiyin = (S.settings && B.difficulty[S.settings.qiyinlik]) || { income: 1, cost: 1, suspicion: 1, discovery: 1 };
+  const qiyin = (S.settings && B.difficulty[S.settings.qiyinlik]) || { income: 1, narx: 1, shubha: 1, discovery: 1 };
 
   // daromad
   const maosh = (S.job && S.job.salary) || B.yearlyIncomeBase;
   S.money += Math.round(maosh * qiyin.income);
 
   // xarajat
-  S.money -= Math.round(B.yearlyCostPerPerson * (S.people.length + 1) * qiyin.cost);
+  S.money -= Math.round(B.yearlyCostPerPerson * (S.people.length + 1) * qiyin.narx);
 
   // aliment
   const sobiq = S.people.filter(p => p.sobiq && p.alive);
@@ -28,21 +28,21 @@ S.children = S.children || [];
   // shubha
   for (const p of S.people) {
     if (!p.alive || p.holat !== 'yashirin') continue;
-    const o'sish = B.suspicionPerYear * qiyin.suspicion * (p.yaqinlik ? 1 : 0.5);
-    p.suspicion = chegara((p.suspicion || 0) + o'sish, 0, 100);
+    const o'sish = B.shubhaPerYear * qiyin.shubha * (p.aloqa ? 1 : 0.5);
+    p.shubha = chegara((p.shubha || 0) + o'sish, 0, 100);
   }
 
   // fosh
   for (const p of S.people) {
     if (!p.alive || p.holat !== 'yashirin') continue;
-    if ((p.suspicion || 0) < B.suspicionThreshold) continue;
+    if ((p.shubha || 0) < B.shubhaThreshold) continue;
     const ehtimol = B.discoveryBase * qiyin.discovery;
     if (Math.random() < ehtimol) {
       p.holat = 'sevgili';
-      p.suspicion = 0;
+      p.shubha = 0;
       if (p.xotinId) {
         const x = S.people.find(q => q.id === p.xotinId);
-        if (x) x.trust = chegara((x.trust || 0) - B.honorLossOnReveal, 0, 100);
+        if (x) x.ishonch = chegara((x.ishonch || 0) - B.honorLossOnReveal, 0, 100);
       }
       natija.yozuv.push({ turi: 'fosh', id: p.id });
     }
@@ -60,7 +60,7 @@ S.children = S.children || [];
     if (typeof S.bolaYarat === 'function') bola = S.bolaYarat(S, ota, p, jins);
     else {
       bola = { id: 'b' + Math.random().toString(36).slice(2, 9), age: 0, jins, alive: true,
-               affection: 50, trust: 50, suspicion: 0, yaqinlik: false,
+               mehr: 50, ishonch: 50, shubha: 0, aloqa: false,
                consanguinity: 0, holat: null, onaId: p.id, otaId: p.pregnant.fatherId };
       S.people.push(bola);
     }

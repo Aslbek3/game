@@ -24,10 +24,10 @@ window.amal = function (holat, shaxsId, usul, balans) {
     if (shaxs.qon > 0 && sozlama.qon === 'ochiq_emas') return { ok: false, sabab: 'qon' };
     if (!balans.methods.includes(usul.id)) return { ok: false, sabab: 'usul' };
     if (shaxs.aloqa < usul.aloqaMin) return { ok: false, sabab: 'aloqa' };
-    if (usul.kech && !holat.kech) return { ok: false, sabab: 'kech' };
-    if (balans.pul < usul.narx) return { ok: false, sabab: 'pul' };
+    if (usul.kech && !holat.night) return { ok: false, sabab: 'kech' };
+    if (balans.money < usul.narx) return { ok: false, sabab: 'pul' };
 
-    balans.pul -= usul.narx;
+    balans.money -= usul.narx;
 
     const muvaffaqiyat = usul.majbur ? true : Math.random() * 100 < usul.ehtimol;
 

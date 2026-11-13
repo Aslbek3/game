@@ -1,0 +1,61 @@
+[
+  {
+    "id": "qiz_tanish",
+    "title": "U senga uzoq qaradi",
+    "weight": 4,
+    "cond": { "relation": "qiz", "aloqa": false, "aloqaMin": 25, "minAge": 15 },
+    "text": "Oshxonada u yonidan o'tayotib to'xtadi. Qo'lida piyola, bug'i chiqib turibdi.\n\n\"Dada, ol.\"\n\nPiyolani berdi, lekin qo'lini tortmadi. Barmoqlari sennikiga tegib turadi.",
+    "choices": [
+      { "label": "Qo'lini ushlab qolish", "effects": [{ "op": "mehr", "v": 12 }, { "op": "shubha", "v": 3 }] },
+      { "label": "Piyolani olib, chetga surish", "effects": [{ "op": "mehr", "v": 4 }] },
+      { "label": "Hazil qilish", "effects": [{ "op": "mehr", "v": 7 }, { "op": "ishonch", "v": 3 }] }
+    ]
+  },
+  {
+    "id": "qiz_birinchi",
+    "title": "U eshikni yopdi va orqasiga suyandi",
+    "weight": 5,
+    "cond": { "relation": "qiz", "aloqa": false, "aloqaMin": 55, "minAge": 16 },
+    "text": "Ko'rpa ostida faqat bir yorug'lik qolgan. U qo'lini ko'tarib, sochidagi toqqani yechdi va sekingina stolga tashladi.\n\n\"Bugun hech qayerga ketmaymiz, to'g'rimi?\"\n\nJavobni kutmaydi. Karavotning chetiga o'tirdi.",
+    "choices": [
+      { "label": "Chiroqni o'chirish", "effects": [{ "op": "intimacy" }, { "op": "mehr", "v": 15 }] },
+      { "label": "Chiroqni qoldirish", "effects": [{ "op": "intimacy" }, { "op": "mehr", "v": 18 }, { "op": "shubha", "v": 4 }] },
+      { "label": "Oldin gaplashish", "effects": [{ "op": "ishonch", "v": 10 }, { "op": "retry", "v": 1 }] }
+    ]
+  },
+  {
+    "id": "qiz_homilador",
+    "title": "Nilufar kechqurun hovlida kutib turibdi",
+    "weight": 6,
+    "cond": { "relation": "qiz", "pregnant": true },
+    "text": "U qo'lida kitob ushlab turibdi, lekin bir varaq ham ochmagan. Sen chiqqaningda boshini ko'tardi.\n\n\"Dada, bir gapim bor edi...\"\n\nU homilador. Ikki oydan beri biladi.",
+    "choices": [
+      { "label": "Otalikni tan olish", "effects": [{ "op": "honor", "v": 5 }, { "op": "mehr", "v": 10 }, { "op": "discovery", "v": 0.7 }] },
+      { "label": "Erining bolasi deb o'tkazish", "effects": [{ "op": "concealPaternity" }, { "op": "discovery", "v": 0.4 }] },
+      { "label": "Oldirib tashlash", "effects": [{ "op": "mehr", "v": -20 }, { "op": "abort" }] }
+    ]
+  },
+  {
+    "id": "xotin_shubha",
+    "title": "Xotin telefonni qo'liga oldi",
+    "weight": 5,
+    "cond": { "relation": "xotin", "aloqaMin": 30 },
+    "text": "U karavotning chetida o'tirib, ekranni aylantirdi.\n\n\"Kim bu? Nega kechqurun yozadi?\"\n\nTelefonni yuzingga tutdi. Ekran yorug'.",
+    "choices": [
+      { "label": "Hamkasb, deyish", "effects": [{ "op": "ishonch", "v": 5 }, { "op": "discovery", "v": 0.3 }] },
+      { "label": "Rostini aytish", "effects": [{ "op": "ishonch", "v": 12 }, { "op": "mehr", "v": -8 }] },
+      { "label": "Telefonni olib qo'yish", "effects": [{ "op": "ishonch", "v": -10 }, { "op": "shubha", "v": 8 }] }
+    ]
+  },
+  {
+    "id": "majbur_sahna",
+    "title": "U qarshilik qildi",
+    "weight": 3,
+    "cond": { "relation": "qiz", "aloqa": true, "aloqaMin": 20 },
+    "text": "U yuzini chetga burdi va qo'lini ko'kragiga qo'ydi.\n\n\"Hozir kayfiyatim yo'q.\"\n\nLekin turgan joyida turibdi, chiqib ketmadi.",
+    "choices": [
+      { "label": "Zo'rlash", "effects": [{ "op": "mehr", "v": -6 }, { "op": "shubha", "v": 4 }] },
+      { "label": "Qo'yib yuborish", "effects": [{ "op": "mehr", "v": 6 }, { "op": "ishonch", "v": 4 }] }
+    ]
+  }
+]

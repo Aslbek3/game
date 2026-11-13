@@ -38,6 +38,7 @@
   "paternityRevealChance": 0.08,
   "honorLossOnReveal": 15,
   "marriageCost": 2000,
+  "alimony": 0.2,
   "yearlyIncomeBase": 1500,
   "yearlyCostPerPerson": 150,
   "eventsPerYear": 1,

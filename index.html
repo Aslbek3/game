@@ -59,10 +59,12 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
 const ekranlar = { bosh: "Bosh", odamlar: "Odamlar", sozlamalar: "Sozlamalar", yangi: "Yangi o'yin" };
-let ekranSheet = null; // null | "odamlar" | "sozlamalar" | "yangi"
+let ekranSheet = null; // null | "odamlar" | "sozlamalar" | "yangi" | "harakatlar"
 let tanlangan = null;
 let menyuOchiq = false;
 let bankOchiq = false;
+let odamlarBolim = null; // null | "oila"
+let harakatBolim = null; // null | "sevgi"
 
 const yorliq = {
   nikoh: "Nikoh", lesbian: "Ayollar orasidagi munosabat", xxx: "Ochiq mazmun",
@@ -147,14 +149,33 @@ function holatMatni(p) {
   return "yolg'iz";
 }
 
+const YAQIN_HOLAT = ["xotin", "sevgili", "yashirin"];
+const YAQIN_REL = ["qiz", "o'g'il"];
+
+function odamQatori(f, r) {
+  const q = el("div", null, "qator" + (f.alive ? "" : " vafot"));
+  const rel = f.holat === "sevgili" ? "sevgili" : f.rel;
+  q.append(el("span", f.name), el("span", `${rel} · ${f.age} yosh${f.alive ? "" : " · vafot"}`));
+  q.onclick = () => { tanlangan = f.id; renderSheet(); };
+  r.append(q);
+}
+
 function odamlarEkran(r) {
+  if (odamlarBolim === "oila") {
+    const orqaga = el("button", "← Odamlar");
+    orqaga.onclick = () => { odamlarBolim = null; renderSheet(); };
+    r.append(orqaga, el("h2", "Oila"));
+    Nasl.familyView().forEach(f => odamQatori(f, r));
+    return;
+  }
   r.append(el("h2", "Odamlar"));
-  Nasl.familyView().forEach(f => {
-    const q = el("div", null, "qator" + (f.alive ? "" : " vafot"));
-    q.append(el("span", f.name), el("span", `${f.rel} · ${f.age} yosh${f.alive ? "" : " · vafot"}`));
-    q.onclick = () => { tanlangan = f.id; renderSheet(); };
-    r.append(q);
-  });
+  const oilaTugma = el("button", "Oila →");
+  oilaTugma.onclick = () => { odamlarBolim = "oila"; renderSheet(); };
+  r.append(oilaTugma);
+  const yaqinlar = Nasl.familyView().filter(f =>
+    f.alive && (YAQIN_HOLAT.includes(f.holat) || YAQIN_REL.includes(f.rel)));
+  if (!yaqinlar.length) r.append(el("div", "Hozircha yaqin odam yo'q.", "lenta-matn"));
+  yaqinlar.forEach(f => odamQatori(f, r));
 }
 
 function kartochka(r, S) {
@@ -180,6 +201,18 @@ function kartochka(r, S) {
     bar.append(ich); barlar.append(bar);
   });
   r.append(barlar);
+
+  if (p.holat === "sevgili" && p.mehr >= 60) {
+    const taklif = el("button", "Nikoh taklifi");
+    taklif.onclick = () => { Nasl.nikohTaklifi(p.id); renderSheet(); };
+    r.append(taklif);
+  }
+  if (p.holat === "xotin") {
+    const ajralish = el("button", "Ajralish");
+    ajralish.onclick = () => { Nasl.ajralish(p.id); renderSheet(); };
+    r.append(ajralish);
+  }
+
   const usullar = el("div"); usullar.id = "usullar";
   r.append(usullar);
   if (window.usullarniChiz) window.usullarniChiz(usullar, S, B, p.id);
@@ -233,6 +266,30 @@ function yangiEkran(r) {
   r.append(t);
 }
 
+const HARAKAT_BOLIMLAR = ["Sevgi", "Karyera", "Mulk", "Saroy", "Sog'liq"];
+
+function harakatlarEkran(r, S) {
+  if (harakatBolim === "sevgi") {
+    const orqaga = el("button", "← Harakatlar");
+    orqaga.onclick = () => { harakatBolim = null; renderSheet(); };
+    r.append(orqaga, el("h2", "Sevgi"));
+    const tanishish = el("button", "Tanishish");
+    const shuYilTanishgan = S.flags.tanishishYili === S.year;
+    tanishish.disabled = shuYilTanishgan;
+    if (shuYilTanishgan) tanishish.title = "Bu yil allaqachon tanishgansiz";
+    tanishish.onclick = () => { Nasl.tanishish(); renderSheet(); };
+    r.append(tanishish);
+    return;
+  }
+  r.append(el("h2", "Harakatlar"));
+  HARAKAT_BOLIMLAR.forEach(nom => {
+    const b = el("button", nom, "usul");
+    if (nom === "Sevgi") b.onclick = () => { harakatBolim = "sevgi"; renderSheet(); };
+    else { b.disabled = true; b.title = "Hali mavjud emas"; }
+    r.append(b);
+  });
+}
+
 function renderSheet() {
   const sheet = $("sheet");
   if (!ekranSheet) { sheet.classList.add("yashirin"); return; }
@@ -242,6 +299,7 @@ function renderSheet() {
   if (ekranSheet === "odamlar") (tanlangan != null ? kartochka(r, S) : odamlarEkran(r));
   else if (ekranSheet === "sozlamalar") sozlamalarEkran(r, S);
   else if (ekranSheet === "yangi") yangiEkran(r);
+  else if (ekranSheet === "harakatlar") harakatlarEkran(r, S);
 }
 
 function renderMenyuRoyxat() {
@@ -254,6 +312,8 @@ function renderMenyuRoyxat() {
       menyuOchiq = false;
       ekranSheet = k === "bosh" ? null : k;
       tanlangan = null;
+      odamlarBolim = null;
+      harakatBolim = null;
       render();
     };
     m.append(b);
@@ -288,10 +348,12 @@ function render() {
 }
 
 $("menyuTugma").onclick = () => { menyuOchiq = !menyuOchiq; renderMenyuRoyxat(); };
-$("sheetYopish").onclick = () => { ekranSheet = null; tanlangan = null; render(); };
+$("sheetYopish").onclick = () => {
+  ekranSheet = null; tanlangan = null; odamlarBolim = null; harakatBolim = null; render();
+};
 $("yoshTugma").onclick = () => Nasl.nextYear();
 $("munosabatTugma").onclick = () => { ekranSheet = "odamlar"; tanlangan = null; render(); };
-$("harakatlarTugma").onclick = () => { ekranSheet = "sozlamalar"; render(); };
+$("harakatlarTugma").onclick = () => { ekranSheet = "harakatlar"; harakatBolim = null; render(); };
 
 Nasl.init(".").then(render);
 </script>

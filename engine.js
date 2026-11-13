@@ -179,7 +179,51 @@ const Nasl = (() => {
   function familyView() {
     return Object.values(S.people)
       .filter(p => p.id !== S.playerId)
-      .map(p => ({ id: p.id, name: fullName(p), age: age(p), alive: alive(p), rel: relation(S.playerId, p.id) }));
+      .map(p => ({ id: p.id, name: fullName(p), age: age(p), alive: alive(p), rel: relation(S.playerId, p.id), holat: p.holat }));
+  }
+
+  // ---------- sevgi ----------
+  function tanishish() {
+    if (S.flags.tanishishYili === S.year) return null;
+    const id = newPerson({ sex: "f", born: S.year - (20 + Math.floor(rnd() * 16)) });
+    const p = P(id);
+    p.holat = "sevgili";
+    p.mehr = 30;
+    S.flags.tanishishYili = S.year;
+    log(`${fullName(p)} bilan tanishdingiz.`);
+    save();
+    return id;
+  }
+
+  function nikohTaklifi(personId) {
+    const p = P(personId);
+    if (!p || p.holat !== "sevgili" || p.mehr < 60) return null;
+    const ehtimol = p.mehr / 100;
+    if (rnd() < ehtimol) {
+      if (!marry(S.playerId, personId, true)) return { ok: false, sabab: "xotinlar_tola" };
+      p.holat = "xotin";
+      log(`${fullName(p)}ga uylandingiz.`);
+      save();
+      return { ok: true, natija: true };
+    }
+    p.mehr = Math.max(0, p.mehr - 10);
+    save();
+    return { ok: true, natija: false };
+  }
+
+  function ajralish(personId) {
+    const p = P(personId);
+    const me = P(S.playerId);
+    if (!p || p.holat !== "xotin") return null;
+    me.spouses = me.spouses.filter(x => x !== personId);
+    me.exSpouses.push(personId);
+    p.spouses = p.spouses.filter(x => x !== S.playerId);
+    p.exSpouses.push(S.playerId);
+    p.sobiq = true;
+    p.holat = null;
+    log(`${fullName(p)} bilan ajrashdingiz.`);
+    save();
+    return true;
   }
 
   // ---------- homiladorlik ----------
@@ -323,6 +367,11 @@ const Nasl = (() => {
     const net = S.money + B.yearlyIncomeBase - living * B.yearlyCostPerPerson;
     if (net < B.moneyMin) { S.debt += B.moneyMin - net; S.money = B.moneyMin; }
     else S.money = net;
+    // aliment: sobiq xotinlarga
+    const maosh = (S.job && S.job.salary) || B.yearlyIncomeBase;
+    for (const p of Object.values(S.people)) {
+      if (p.sobiq && alive(p)) S.money -= Math.round(maosh * B.alimony);
+    }
     // qarz foizi faqat pul tugab, qarzga botilganda
     if (S.money <= B.moneyMin && S.debt > 0) S.debt = Math.round(S.debt + S.debt * B.debtInterestRate);
     // o'lim
@@ -386,6 +435,7 @@ const Nasl = (() => {
   return {
     init, newGame, nextYear, choose, marry, concealPaternity,
     relation, familyView, eligibleSingles, exportJSON, importJSON, save,
+    tanishish, nikohTaklifi, ajralish,
     get state() { return S; }, get balance() { return B; },
     get events() { return EVENTS; }, age, fullName, person: P
   };

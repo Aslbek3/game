@@ -14,38 +14,49 @@ function fertillik(yosh, jadval) {
     return 0;
 }
 
-window.amal = function (holat, shaxsId, usul, balans) {
-    const sozlama = holat.sozlama;
-    const qiyinlik = holat.qiyinlik;
-    const shaxs = holat.shaxslar[shaxsId];
+const QIYINLIK_KOP = { yumshoq: 0.7, normal: 1, qattiq: 1.4 };
 
-    if (!shaxs || !shaxs.tirik) return { ok: false, sabab: 'tirik' };
-    if (shaxs.yosh < sozlama.yosh) return { ok: false, sabab: 'yosh' };
-    if (shaxs.qon > 0 && sozlama.qon === 'ochiq_emas') return { ok: false, sabab: 'qon' };
-    if (!balans.methods.includes(usul.id)) return { ok: false, sabab: 'usul' };
-    if (shaxs.aloqa < usul.aloqaMin) return { ok: false, sabab: 'aloqa' };
+window.amal = function (holat, shaxsId, usulNomi, balans) {
+    const sozlama = window.bilanQosh ? window.bilanQosh(holat.settings || {}) : (holat.settings || {});
+    const shaxs = holat.people[shaxsId];
+
+    if (!shaxs || shaxs.diedYear != null) return { ok: false, sabab: 'tirik' };
+    const yosh = holat.year - shaxs.born;
+    if (yosh < (sozlama.yosh ?? 0)) return { ok: false, sabab: 'yosh' };
+    if ((shaxs.consanguinity || 0) > 0 && sozlama.qon === 'ochiq_emas') return { ok: false, sabab: 'qon' };
+
+    const usul = balans.methods[usulNomi];
+    if (!usul) return { ok: false, sabab: 'usul' };
+    if ((shaxs.mehr || 0) < (usul.aloqaMin || 0)) return { ok: false, sabab: 'aloqa' };
     if (usul.kech && !holat.night) return { ok: false, sabab: 'kech' };
-    if (balans.money < usul.narx) return { ok: false, sabab: 'pul' };
+    if (holat.money < (usul.narx || 0)) return { ok: false, sabab: 'pul' };
 
-    balans.money -= usul.narx;
+    holat.money -= (usul.narx || 0);
 
-    const muvaffaqiyat = usul.majbur ? true : Math.random() * 100 < usul.ehtimol;
+    const muvaffaqiyat = usulNomi === 'majbur' ? true : Math.random() < usul.ehtimol;
+    const qiyinlikKop = QIYINLIK_KOP[sozlama.qiyinlik] || 1;
 
     if (muvaffaqiyat) {
         shaxs.aloqa = true;
-        shaxs.mehr = (shaxs.mehr || 0) + usul.mehrFarq;
-        shaxs.shubha = (shaxs.shubha || 0) + usul.shubha * qiyinlik;
+        shaxs.mehr = Math.max(0, Math.min(100, (shaxs.mehr || 0) + (usul.mehrFarq || 0)));
+        shaxs.shubha = Math.max(0, Math.min(100, (shaxs.shubha || 0) + (usul.shubha || 0) * qiyinlikKop));
     } else {
-        shaxs.mehr = (shaxs.mehr || 0) - 3;
+        shaxs.mehr = Math.max(0, (shaxs.mehr || 0) - 3);
     }
 
     let homiladorBoldi = false;
 
-    if (shaxs.aloqa === true && shaxs.yosh >= 11 && shaxs.yosh <= 45 && !shaxs.homilador && shaxs.jins === 'f') {
-        const fert = fertillik(shaxs.yosh, sozlama.fertillikJadvali);
-        const ehtimol = usul.homiladorlikFoiz * fert / 100;
+    const allaqachonHomilador = holat.pregnancies.some(x => x.motherId === shaxs.id);
+    if (shaxs.aloqa === true && yosh >= 11 && yosh <= 45 && !allaqachonHomilador && shaxs.jins === 'f') {
+        const fert = fertillik(yosh, sozlama.fertillikJadvali);
+        const ehtimol = (usul.homiladorlikFoiz || 0) * fert / 100;
         if (Math.random() * 100 < ehtimol) {
-            shaxs.homilador = { otaId: holat.player.id, oy: 0 };
+            holat.pregnancies.push({
+                motherId: shaxs.id,
+                realFatherId: holat.playerId,
+                recordedFatherId: holat.playerId,
+                dueYear: holat.year + (balans.pregnancyYears || 1)
+            });
             homiladorBoldi = true;
         }
     }

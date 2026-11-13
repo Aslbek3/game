@@ -42,7 +42,10 @@
 
 <div id="sheet" class="yashirin">
   <div class="sheet-ichki">
-    <div class="sheet-bosh"><button id="sheetYopish">&times;</button></div>
+    <div class="sheet-bosh">
+      <span id="sheetNom" class="sheet-nom"></span>
+      <button id="sheetYopish">&times;</button>
+    </div>
     <div id="sheetTana"></div>
   </div>
 </div>
@@ -65,17 +68,6 @@ let menyuOchiq = false;
 let bankOchiq = false;
 let odamlarBolim = null; // null | "oila"
 let harakatBolim = null; // null | "sevgi"
-
-const yorliq = {
-  nikoh: "Nikoh", lesbian: "Ayollar orasidagi munosabat", xxx: "Ochiq mazmun",
-  matn: "Matn ochiqligi", olim: "O'lim", tasodif: "Tasodif", qiyinlik: "Qiyinlik"
-};
-const tanlov = {
-  nikoh: ["mono", "kop", "cheksiz"],
-  matn: ["ishora", "orta", "ochiq"],
-  tasodif: ["past", "orta", "yuqori"],
-  qiyinlik: ["yumshoq", "normal", "qattiq"]
-};
 
 function el(tag, matn, cls) {
   const e = document.createElement(tag);
@@ -164,11 +156,10 @@ function odamlarEkran(r) {
   if (odamlarBolim === "oila") {
     const orqaga = el("button", "← Odamlar");
     orqaga.onclick = () => { odamlarBolim = null; renderSheet(); };
-    r.append(orqaga, el("h2", "Oila"));
+    r.append(orqaga);
     Nasl.familyView().forEach(f => odamQatori(f, r));
     return;
   }
-  r.append(el("h2", "Odamlar"));
   const oilaTugma = el("button", "Oila →");
   oilaTugma.onclick = () => { odamlarBolim = "oila"; renderSheet(); };
   r.append(oilaTugma);
@@ -182,7 +173,7 @@ function kartochka(r, S) {
   const p = Nasl.person(tanlangan);
   const orqaga = el("button", "← Ro'yxatga");
   orqaga.onclick = () => { tanlangan = null; renderSheet(); };
-  r.append(orqaga, el("h2", Nasl.fullName(p)));
+  r.append(orqaga);
   const b = el("div", null, "blok");
   [
     ["Yosh", Nasl.age(p)],
@@ -225,29 +216,53 @@ function kartochka(r, S) {
   r.append(t);
 }
 
+function sozlamaQatorYarat(S, kalit, yorliqMatn, variantlar) {
+  const q = el("div", null, "sozlama-qator");
+  q.append(el("span", yorliqMatn, "sozlama-yorliq"));
+  const seg = el("div", null, "segment");
+  variantlar.forEach(([qiymat, matn]) => {
+    const b = el("button", matn);
+    if (S.settings[kalit] === qiymat) b.classList.add("faol");
+    b.onclick = () => { S.settings[kalit] = qiymat; Nasl.save(); renderSheet(); };
+    seg.append(b);
+  });
+  q.append(seg);
+  return q;
+}
+
+function sozlamaBolimi(nom, qatorlar) {
+  const bolim = el("div", null, "sozlama-bolim");
+  bolim.append(el("div", nom, "sozlama-bolim-nom"));
+  qatorlar.forEach(q => bolim.append(q));
+  return bolim;
+}
+
+const BOOL_VARIANT = [[false, "Yo'q"], [true, "Ha"]];
+
 function sozlamalarEkran(r, S) {
-  r.append(el("h2", "Sozlamalar"));
-  const b = el("div", null, "blok");
-  for (const [k, v] of Object.entries(S.settings)) {
-    if (!(k in yorliq)) continue;
-    const q = el("div", null, "sozlama");
-    q.append(el("span", yorliq[k]));
-    if (typeof v === "boolean") {
-      const t = el("button", v ? "Yoqilgan" : "O'chiq");
-      t.onclick = () => { S.settings[k] = !v; Nasl.save(); renderSheet(); };
-      q.append(t);
-    } else {
-      const s = document.createElement("select");
-      (tanlov[k] || [v]).forEach(o => { const op = el("option", o); op.value = o; if (o === v) op.selected = true; s.append(op); });
-      s.onchange = () => { S.settings[k] = s.value; Nasl.save(); };
-      q.append(s);
-    }
-    b.append(q);
-  }
-  r.append(b);
+  r.append(sozlamaBolimi("Nikoh", [
+    sozlamaQatorYarat(S, "nikoh", "Nikoh", [["mono", "Mono"], ["kop", "Ko'p"], ["cheksiz", "Cheksiz"]]),
+    sozlamaQatorYarat(S, "lesbian", "Lesbian", BOOL_VARIANT),
+  ]));
+
+  const kontentBolim = sozlamaBolimi("Kontent", [
+    sozlamaQatorYarat(S, "xxx", "XXX kasblar", BOOL_VARIANT),
+    sozlamaQatorYarat(S, "matn", "Matn", [["ishora", "Ishora"], ["orta", "O'rta"], ["ochiq", "Ochiq"]]),
+  ]);
   const extraSozlamalar = el("div"); extraSozlamalar.id = "extra-sozlamalar";
-  r.append(extraSozlamalar);
+  kontentBolim.append(extraSozlamalar);
+  r.append(kontentBolim);
   if (window.extraSozlamalarniChiz) window.extraSozlamalarniChiz(extraSozlamalar, S);
+
+  r.append(sozlamaBolimi("O'yin", [
+    sozlamaQatorYarat(S, "olim", "O'lim", BOOL_VARIANT),
+    sozlamaQatorYarat(S, "tasodif", "Tasodif", [["past", "Past"], ["orta", "O'rta"], ["yuqori", "Yuqori"]]),
+  ]));
+
+  r.append(sozlamaBolimi("Qiyinlik", [
+    sozlamaQatorYarat(S, "qiyinlik", "Qiyinlik", [["yumshoq", "Yumshoq"], ["normal", "Normal"], ["qattiq", "Qattiq"]]),
+  ]));
+
   const ta = document.createElement("textarea"); ta.className = "yashirin";
   const e = el("button", "Eksport"); e.onclick = () => { ta.classList.remove("yashirin"); ta.value = Nasl.exportJSON(); };
   const i = el("button", "Import");
@@ -259,7 +274,6 @@ function sozlamalarEkran(r, S) {
 }
 
 function yangiEkran(r) {
-  r.append(el("h2", "Yangi o'yin"));
   r.append(el("p", "Joriy saqlash o'chiriladi."));
   const t = el("button", "Boshlash");
   t.onclick = () => { Nasl.newGame(); ekranSheet = null; tanlangan = null; render(); };
@@ -272,7 +286,7 @@ function harakatlarEkran(r, S) {
   if (harakatBolim === "sevgi") {
     const orqaga = el("button", "← Harakatlar");
     orqaga.onclick = () => { harakatBolim = null; renderSheet(); };
-    r.append(orqaga, el("h2", "Sevgi"));
+    r.append(orqaga);
     const tanishish = el("button", "Tanishish");
     const shuYilTanishgan = S.flags.tanishishYili === S.year;
     tanishish.disabled = shuYilTanishgan;
@@ -281,7 +295,6 @@ function harakatlarEkran(r, S) {
     r.append(tanishish);
     return;
   }
-  r.append(el("h2", "Harakatlar"));
   HARAKAT_BOLIMLAR.forEach(nom => {
     const b = el("button", nom, "usul");
     if (nom === "Sevgi") b.onclick = () => { harakatBolim = "sevgi"; renderSheet(); };
@@ -290,10 +303,22 @@ function harakatlarEkran(r, S) {
   });
 }
 
+function sheetNomini() {
+  if (ekranSheet === "odamlar") {
+    if (tanlangan != null) return Nasl.fullName(Nasl.person(tanlangan));
+    return odamlarBolim === "oila" ? "Oila" : "Odamlar";
+  }
+  if (ekranSheet === "sozlamalar") return "Sozlamalar";
+  if (ekranSheet === "yangi") return "Yangi o'yin";
+  if (ekranSheet === "harakatlar") return harakatBolim === "sevgi" ? "Sevgi" : "Harakatlar";
+  return "";
+}
+
 function renderSheet() {
   const sheet = $("sheet");
   if (!ekranSheet) { sheet.classList.add("yashirin"); return; }
   sheet.classList.remove("yashirin");
+  $("sheetNom").textContent = sheetNomini();
   const r = $("sheetTana"); r.innerHTML = "";
   const S = Nasl.state;
   if (ekranSheet === "odamlar") (tanlangan != null ? kartochka(r, S) : odamlarEkran(r));

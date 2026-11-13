@@ -33,9 +33,12 @@
       const nuqson = sabab(p, usul, b, s);
       const tugma = document.createElement('button');
       tugma.className = 'usul';
-      tugma.innerHTML = '<b>' + (YORLIQ[usul] || usul) + '</b>'
-        + (m.narx ? '<small>$' + m.narx + '</small>' : '')
-        + (nuqson ? '<small class="sabab">' + nuqson + '</small>' : '');
+      const chap = document.createElement('b');
+      chap.textContent = YORLIQ[usul] || usul;
+      const ong = document.createElement('small');
+      const narxMatn = m.narx ? '$' + m.narx : '';
+      ong.textContent = narxMatn + (nuqson ? (narxMatn ? ' · ' : '') + nuqson : '');
+      tugma.append(chap, ong);
       tugma.disabled = !!nuqson;
       tugma.onclick = () => {
         const natija = window.amal(state, id, usul, b);
@@ -55,38 +58,31 @@
     if (!el) return;
     el.innerHTML = '';
     const yorliq = { qon: 'Incest', yosh: 'Pedofiliya chegarasi', majbur: "Zo'rlash" };
-    const tanlov = { qon: ['qulf', 'ochiq', 'ochiq_emas'], yosh: [6, 8, 10] };
+    const variantlar = {
+      qon: [['qulf', 'Qulf'], ['ochiq', 'Ochiq'], ['ochiq_emas', "O'chiq"]],
+      yosh: [[6, '6'], [8, '8'], [10, '10']],
+      majbur: [[false, "Yo'q"], [true, 'Ha']]
+    };
+    const effektiv = window.bilanQosh(state.settings || {});
 
     for (const kalit in window.SETTINGS_EXTRA) {
       const qator = document.createElement('div');
-      qator.className = 'sozlama';
+      qator.className = 'sozlama-qator';
       const nom = document.createElement('span');
+      nom.className = 'sozlama-yorliq';
       nom.textContent = yorliq[kalit] || kalit;
       qator.appendChild(nom);
 
-      if (tanlov[kalit]) {
-        const sel = document.createElement('select');
-        tanlov[kalit].forEach(v => {
-          const o = document.createElement('option');
-          o.value = v;
-          o.textContent = kalit === 'qon'
-            ? ({ qulf: 'Qulf bilan', ochiq: 'Ochiq', ochiq_emas: "O'chirilgan" })[v]
-            : v;
-          if (String(state.settings[kalit]) === String(v)) o.selected = true;
-          sel.appendChild(o);
-        });
-        sel.onchange = () => {
-          state.settings[kalit] = isNaN(sel.value) ? sel.value : +sel.value;
-          yangila();
-        };
-        qator.appendChild(sel);
-      } else {
-        const ch = document.createElement('input');
-        ch.type = 'checkbox';
-        ch.checked = !!state.settings[kalit];
-        ch.onchange = () => { state.settings[kalit] = ch.checked; yangila(); };
-        qator.appendChild(ch);
-      }
+      const seg = document.createElement('div');
+      seg.className = 'segment';
+      (variantlar[kalit] || []).forEach(([qiymat, matn]) => {
+        const b = document.createElement('button');
+        b.textContent = matn;
+        if (effektiv[kalit] === qiymat) b.classList.add('faol');
+        b.onclick = () => { state.settings[kalit] = qiymat; yangila(); };
+        seg.appendChild(b);
+      });
+      qator.appendChild(seg);
       el.appendChild(qator);
     }
   };

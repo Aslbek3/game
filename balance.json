@@ -52,5 +52,15 @@
   "startChildren": 2,
   "maxSpouses": 4,
   "saveKey": "nasl_save_v2",
-  "logLimit": 200
+  "logLimit": 200,
+  "methods": {
+    "suhbat":     { "narx": 0,   "aloqaMin": 20, "ehtimol": 0.5,  "shubha": 2 },
+    "sovga":      { "narx": 120, "aloqaMin": 0,  "ehtimol": 0.7,  "shubha": -15 },
+    "alkogol":    { "narx": 90,  "aloqaMin": 10, "ehtimol": 0.75, "shubha": 4, "kech": true },
+    "afrodizyak": { "narx": 340, "aloqaMin": 25, "ehtimol": 0.9,  "shubha": 0 },
+    "massaj":     { "narx": 0,   "aloqaMin": 40, "ehtimol": 0.8,  "shubha": 3 },
+    "ofuro":      { "narx": 0,   "aloqaMin": 50, "ehtimol": 0.9,  "shubha": 5 },
+    "tungi":      { "narx": 0,   "aloqaMin": 30, "ehtimol": 0.6,  "shubha": 6, "kech": true },
+    "majbur":     { "narx": 0,   "aloqaMin": 0,  "ehtimol": 1.0,  "shubha": 4, "mehrFarq": -8 }
+  }
 }
